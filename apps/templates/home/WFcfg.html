@@ -1,0 +1,39 @@
+{% extends "layouts/base.html" %}
+{% block title %}WFcfg{% endblock title %}
+{% block content %}
+ <div class="pcoded-content">
+    {% csrf_token %}
+    <div class="card">
+      <div class="card-header">
+        <h5>Backup Device Config (WFcfg) </h5>
+      </div>
+     <div class "card-body">
+      <div class="col-md-6">
+<form method="POST" enctype="multipart/form-data">
+ <div class="form-group">
+    {{ form }}
+    {% csrf_token %}
+ </div>
+{% if submit_button %}
+    <input type = "submit" value = "{{ submit_button }}">
+{% endif %}
+</form>
+    </div>
+{% if config %}
+   <div class="card">
+      <div class="card-header">
+        <h5>Running Configuration</h5>
+        <a href= {{ download_URL }}>Download</a>
+      </div>
+     <div class "card-body">
+      <div class="col-md-6">
+       <pre><code>
+        {{ config }} 
+       </code></pre>
+      </div>
+     </div>
+   </div>
+{% endif %}
+ </div>
+
+{% endblock content %}

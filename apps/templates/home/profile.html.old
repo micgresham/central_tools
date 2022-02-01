@@ -1,0 +1,25 @@
+## view_profile.html
+{% extends "layouts/base.html" %}
+
+{% block head %}
+{%endblock%}
+
+{%block content%}
+
+Profile
+Username: {{ user }} 
+First name: {{ user.first_name }} 
+Last name: {{ user.last_name }} 
+Email: {{ user.email }} 
+Description: {{ user.userprofile.description }} 
+Phone: {{ user.userprofile.phoneNumber }} 
+City: {{ user.userprofile.city }} 
+Website: {{ user.userprofile.website }}
+Central Username: {{ user.userprofile.central_username }} 
+Central Password: {{ user.userprofile.central_Password }} 
+<p>
+<button type="button">Edit your Profile</button>
+<button type="button">Change your password</button>
+</p>
+ {%endblock content%}
+

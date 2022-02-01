@@ -1,0 +1,79 @@
+{% extends "layouts/base.html" %}
+{% block title %}Create Group{% endblock title %}
+{% block content %}
+ <div class="pcoded-content">
+   <div class="form-content">
+        {% csrf_token %}
+        <div class="card">
+          <div class="card-header">
+            <h5>Create Template Multi Group</h5>
+          </div>
+          <div class "card-body">
+            <div class="col-md-6">
+              <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group">
+                  <label class="small mb-1">Template Group Name:</label>
+                    {{ form.Tgroup_name }}
+                </div>
+
+                <div class="form-group">
+                  <label class="small mb-1">Template Name Range:</label>
+                    {{ form.Tgroup_range }}
+                </div>
+
+                <h5 class="mt-5">Template Group For</h5>
+                <hr>
+                <div class="form-group form-check">
+                   {{ form.TgroupTypes }}
+                </div>
+                <h5 class="mt-5">Group will contain:</h5>
+                <hr>
+                <div class="form-group form-check">
+                   {{ form.AllowedDeviceTypes }}
+                </div>
+                <h5 class="mt-5">Roles:</h5>
+                <hr>
+                <div class="form-group">
+                  <label class="large">Architecture:</label>
+                    {{ form.Architecture }}
+                </div>
+                <div class="form-group">
+                  <label class="large">AP Network Role:</label>
+                    {{ form.ApNetworkRole }}
+                </div>
+                <div class="form-group">
+                  <label class="large">Gateway Network Role:</label>
+                    {{ form.GwNetworkRole }}
+                </div>
+                <h5 class="mt-5">Allowed Switch Types:</h5>
+                <hr>
+                <div class="form-group">
+                    {{ form.AllowedSwitchTypes }}
+                </div>
+
+                <h5 class="mt-5">Template:</h5>
+                <hr>
+                <div class="form-group">
+                  <label class="small mb-1">Template:</label>
+                    {{ form.template }}
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1">Device Type:</label>
+                    {{ form.TDevType }}
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1">Model:</label>
+                    {{ form.Tmodel }}
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1">Version:</label>
+                    {{ form.Tversion }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-dark btn-lg">Create Group</button>
+     </form>
+   </div>
+ </div>
+{% endblock content %}
