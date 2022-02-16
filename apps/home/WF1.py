@@ -498,7 +498,7 @@ def WF1select_site(request):
                  device_serial = each['serial']
 
          queryset = get_variables(request, device_serial)
-         
+         print(queryset) 
          variable_set = list()
          for each in queryset['data']['variables']:
              variable_set.append((each,each + ' (' + queryset['data']['variables'][each] + ')'))
@@ -638,11 +638,13 @@ def WF1select_site(request):
                   dev_set.append((each['serial'],each['name']))
 
 
+         print(dev_set)
+
          # here is where we set the variable for each of the serials in template_set
          for each in dev_set:
-#            print(each[0])
-#            print(variable)
-#            print(value)
+            print(each[0])
+            print(variable)
+            print(value)
             if (override_commit_off):
                response = set_autocommit(request, "On", each[0])
                if response:
@@ -670,7 +672,7 @@ def WF1select_site(request):
             queryset = get_site_inventory(request,site, "AP")
             dev_set = list()
             for each in queryset['aps']:
-               if (swarn_name == each['swarn_name']):
+               if (swarm_name == each['swarm_name']):
                   dev_set.append((each['serial'],each['name']))
          else:
             queryset = get_site_inventory(request,site, "SWITCH")
@@ -692,9 +694,9 @@ def WF1select_site(request):
                else:
                  messages.warning(request, 'FAILED (' + response.status_code + ') to set commit set to ON for device ' + each[0])
             if "Success" in set_variable(request, each[0], variable, value ):
-              messages.success(request, 'Variable ' + variable + ' updated to ' + value + ' in swarm: ' + swarn_name + ' for device ' + each[1] + ' (' + each[0] + ')')
+              messages.success(request, 'Variable ' + variable + ' updated to ' + value + ' in swarm: ' + swarm_name + ' for device ' + each[1] + ' (' + each[0] + ')')
             else:
-              messages.warning(request, 'FAILED to set Variable = ' + variable + ' updated in swarm:  ' + swarn_name + ' for device ' + each[1]  + ' (' + each[0] + ')')
+              messages.warning(request, 'FAILED to set Variable = ' + variable + ' updated in swarm:  ' + swarm_name + ' for device ' + each[1]  + ' (' + each[0] + ')')
 
        context = {'submit_button': "Next"}
        context['form']= WF1SelectSiteForm(username=username)
