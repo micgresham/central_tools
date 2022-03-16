@@ -2,7 +2,7 @@
 
 ## Get the code
 <br>
-git clone https://github.com/micgesham/central_tools.git<br>
+git clone https://github.com/micgresham/central_tools.git<br>
 cd central-tools<br>
 
 ## Virtualenv modules installation (Unix based systems)
