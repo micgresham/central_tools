@@ -95,9 +95,9 @@ class WF1SelectSiteForm(forms.Form):
 #        model = CentralSites
 #        fields = ['site_name']
 
-    def __init__(self, *args, username='%', **kwargs):
+    def __init__(self, *args, customer_id='%', **kwargs):
         super(WF1SelectSiteForm, self).__init__(*args, **kwargs)
-        self.fields['site_name'].queryset = CentralSites.objects.filter(key__contains=username)
+        self.fields['site_name'].queryset = CentralSites.objects.filter(customer_id__contains=customer_id).order_by('site_name')
         self.fields['site_name'].label_from_instance = lambda obj: "%s" % obj.site_name
 
 class WF1SelectTemplateForm(forms.Form):            
@@ -282,7 +282,6 @@ class WF1SelectVariableVCForm(forms.Form):
 @login_required(login_url="/login/")
 def WF1select_site(request):
 
-  username = request.user.username
 
   if request.method == 'POST': #a site and dvice type has been selected, now select the variables
     context = {}
@@ -300,7 +299,7 @@ def WF1select_site(request):
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['form']= WF1SelectSiteForm(username=username)
+              context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
            device_serial = queryset['aps'][0]['serial']
@@ -315,7 +314,7 @@ def WF1select_site(request):
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['form']= WF1SelectSiteForm(username=username)
+              context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
            device_serial = queryset['switches'][0]['serial']
@@ -334,7 +333,7 @@ def WF1select_site(request):
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['form']= WF1SelectSiteForm(username=username)
+              context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
            for each in queryset['aps']:
@@ -351,7 +350,7 @@ def WF1select_site(request):
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['form']= WF1SelectSiteForm(username=username)
+              context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
            device_serial = queryset['switches'][0]['serial']
@@ -368,14 +367,14 @@ def WF1select_site(request):
          if (dev_type == 'IAP'):
             messages.warning(request, 'Bad selection. APs cannot be in a stack')
             context = {'submit_button': "Next"}
-            context['form']= WF1SelectSiteForm(username=username)
+            context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
             return render( request, "home/WF1.html", context)
          else: # switch stacks
            queryset = get_site_inventory(request,site, "SWITCH")
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['form']= WF1SelectSiteForm(username=username)
+              context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
            for each in queryset['switches']:
@@ -391,14 +390,14 @@ def WF1select_site(request):
          if (dev_type == 'SWITCH'):
             messages.warning(request, 'Bad selection. SWITCHES cannot be in a VC')
             context = {'submit_button': "Next"}
-            context['form']= WF1SelectSiteForm(username=username)
+            context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
             return render( request, "home/WF1.html", context)
          else: # IAP swarm
            queryset = get_site_inventory(request,site, "AP")
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['form']= WF1SelectSiteForm(username=username)
+              context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
            for each in queryset['aps']:
@@ -438,8 +437,9 @@ def WF1select_site(request):
          queryset = get_variables(request, device_serial)
  
          variable_set = list()
-         for each in queryset['data']['variables']:
-             variable_set.append((each,each + ' (' + queryset['data']['variables'][each] + ')'))
+         if (variable_set):         
+           for each in queryset['data']['variables']:
+               variable_set.append((each,each + ' (' + str(queryset['data']['variables'][each]) + ')'))
             
        
          context = {'submit_button': "Submit"}
@@ -461,13 +461,13 @@ def WF1select_site(request):
          if not queryset:  # no variables defined for the device
             messages.warning(request, 'No variables define for device ' + device_name + '(' + device_serial + ')')
             context = {'submit_button': "Next"}
-            context['form']= WF1SelectSiteForm(username=username)
+            context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
             return render( request, "home/WF1.html", context)
            
 
          variable_set = list()
          for each in queryset['data']['variables']:
-             variable_set.append((each,each + ' (' + queryset['data']['variables'][each] + ')'))
+             variable_set.append((each,each + ' (' + str(queryset['data']['variables'][each]) + ')'))
 
          context = {'submit_button': "Submit"}
          context['form']= WF1SelectVariableDeviceForm(site_name=request.POST.get('site_name'),
@@ -498,10 +498,16 @@ def WF1select_site(request):
                  device_serial = each['serial']
 
          queryset = get_variables(request, device_serial)
-         print(queryset) 
+         print(queryset)
+         if not queryset:  # no variables defined
+            messages.warning(request, 'No variables define for stack '+ stack_name)
+            context = {'submit_button': "Next"}
+            context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
+            return render( request, "home/WF1.html", context)
+         
          variable_set = list()
          for each in queryset['data']['variables']:
-             variable_set.append((each,each + ' (' + queryset['data']['variables'][each] + ')'))
+             variable_set.append((each,each + ' (' + str(queryset['data']['variables'][each]) + ')'))
 
          context['submit_button'] = "Submit"
          context['form']= WF1SelectVariableStackForm(site_name=request.POST.get('site_name'),
@@ -525,10 +531,15 @@ def WF1select_site(request):
 
          swarm_serial = swarm_set[0][0]
          queryset = get_variables(request, swarm_serial)
-
+         if not queryset:  # no variables defined for the device
+            messages.warning(request, 'No variables define for swarm '+ swarm_name)
+            context = {'submit_button': "Next"}
+            context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
+            return render( request, "home/WF1.html", context)
+            
          variable_set = list()
          for each in queryset['data']['variables']:
-             variable_set.append((each,each + ' (' + queryset['data']['variables'][each] + ')'))
+             variable_set.append((each,each + ' (' + str(queryset['data']['variables'][each]) + ')'))
 
          context['submit_button'] = "Submit"
          context['form']= WF1SelectVariableVCForm(site_name=request.POST.get('site_name'),
@@ -578,15 +589,18 @@ def WF1select_site(request):
 
          # here is where we set the variable for each of the serials in template_set
          for each in dev_set:
-#            print(each[0])
-#            print(variable)
-#            print(value)
+
             if (override_commit_off):
                response = set_autocommit(request, "On", each[0])
-               if response:
-                 messages.success(request, 'Commit set to ON for device ' + each[0])
+               if response.status_code == 200:
+                 messages.success(request, 'Commit set to ON for device ' + each[1] + ' (' + each[0] + ')')
+               elif response.status_code == 400:
+                 data = response.json()
+                 messages.warning(request, 'FAILED - '+ data['description'])
                else:
-                 messages.warning(request, 'FAILED (' + response.status_code + ') to set commit set to ON for device ' + each[0])
+                 data = response.json()
+                 messages.warning(request, 'FAILED - '+ data['description']) 
+
             if "Success" in set_variable(request, each[0], variable, value ):
               messages.success(request, 'Variable ' + variable + ' updated to ' + value + ' in template ' + template_name + ' for device ' + each[1] + ' (' + each[0] + ')') 
             else:
@@ -600,17 +614,22 @@ def WF1select_site(request):
 
          if (override_commit_off):
             response = set_autocommit(request, "On", device_serial)
-            if response:
+            if response.status_code == 200:
               messages.success(request, 'Commit set to ON for device ' + device_name + ' (' + device_serial + ')')
+            elif response.status_code == 400:
+              data = response.json()
+              messages.warning(request, 'FAILED - '+ data['description'])
             else:
-              messages.warning(request, 'FAILED (' + response.status_code + ') to set commit set to ON for device ' + device_name + ' (' + device_serial + ')')
+              data = response.json()
+              messages.warning(request, 'FAILED - '+ data['description'])
          if "Success" in set_variable(request, device_serial, variable, value ):
-           messages.success(request, 'Variable ' + variable + ' updated to ' + value + ' in template ' + template_name + ' for device ' + device_name + ' (' + device_serial + ')')
+           print(variable)
+           print(value)
+           print(device_name)
+           print(device_serial)
+           messages.success(request, 'Variable ' + variable + ' updated to ' + value + ' for device ' + device_name + ' (' + device_serial + ')')
          else:
-           messages.warning(request, 'FAILED to set Variable = ' + variable + ' updated in template ' + template_name + ' for device ' + device_name  + ' (' + device_serial + ')')
-
-
-
+           messages.warning(request, 'FAILED to set Variable = ' + variable + '  for device ' + device_name  + ' (' + device_serial + ')')
 
        elif (change_type == "3"): #change type is for a stack
          print("in change type 3")
@@ -642,15 +661,17 @@ def WF1select_site(request):
 
          # here is where we set the variable for each of the serials in template_set
          for each in dev_set:
-            print(each[0])
-            print(variable)
-            print(value)
             if (override_commit_off):
                response = set_autocommit(request, "On", each[0])
-               if response:
-                 messages.success(request, 'Commit set to ON for device ' + each[0])
+               if response.status_code == 200:
+                 messages.success(request, 'Commit set to ON for device ' + each[1] + ' (' + each[0] + ')')
+               elif response.status_code == 400:
+                 data = response.json()
+                 messages.warning(request, 'FAILED - '+ data['description'])
                else:
-                 messages.warning(request, 'FAILED (' + response.status_code + ') to set commit set to ON for device ' + each[0])
+                 data = response.json()
+                 messages.warning(request, 'FAILED - '+ data['description']) 
+
             if "Success" in set_variable(request, each[0], variable, value ):
               messages.success(request, 'Variable ' + variable + ' updated to ' + value + ' in stack: ' + stack_name + ' for device ' + each[1] + ' (' + each[0] + ')')
             else:
@@ -684,22 +705,24 @@ def WF1select_site(request):
 
          # here is where we set the variable for each of the serials in template_set
          for each in dev_set:
-#            print(each[0])
-#            print(variable)
-#            print(value)
             if (override_commit_off):
                response = set_autocommit(request, "On", each[0])
-               if response:
-                 messages.success(request, 'Commit set to ON for device ' + each[0])
+               if response.status_code == 200:
+                 messages.success(request, 'Commit set to ON for device ' + each[1] + ' (' + each[0] + ')')
+               elif response.status_code == 400:
+                 data = response.json()
+                 messages.warning(request, 'FAILED - '+ data['description'])
                else:
-                 messages.warning(request, 'FAILED (' + response.status_code + ') to set commit set to ON for device ' + each[0])
+                 data = response.json()
+                 messages.warning(request, 'FAILED - '+ data['description']) 
+
             if "Success" in set_variable(request, each[0], variable, value ):
               messages.success(request, 'Variable ' + variable + ' updated to ' + value + ' in swarm: ' + swarm_name + ' for device ' + each[1] + ' (' + each[0] + ')')
             else:
               messages.warning(request, 'FAILED to set Variable = ' + variable + ' updated in swarm:  ' + swarm_name + ' for device ' + each[1]  + ' (' + each[0] + ')')
 
        context = {'submit_button': "Next"}
-       context['form']= WF1SelectSiteForm(username=username)
+       context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
        return render( request, "home/WF1.html", context)
 
     elif (stage == '4'):
@@ -707,12 +730,12 @@ def WF1select_site(request):
     else:
        print("NO STAGE PROCESSING")
        context = {'submit_button': "Next"}
-       context['form']= WF1SelectSiteForm(username=username)
+       context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
        return render( request, "home/WF1.html", context)
 
   else:
     context = {'submit_button': "Next"}
-    context['form']= WF1SelectSiteForm(username=username)
+    context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
     return render( request, "home/WF1.html", context)
 
 

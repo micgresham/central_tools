@@ -14,6 +14,7 @@ from .common_views import test_central
 from .WFtg import create_tgroup, create_mtgroup, show_sites
 from .WF1 import WF1select_site
 from .WFcfg import WFcfg_select_site
+from .WFsql import execute_sql
 
 
 
@@ -32,6 +33,7 @@ urlpatterns = [
     path('show_sites/', show_sites, name='show_sites'),
     path('WF1select_site/', WF1select_site, name='WF1select_site'),
     path('WFcfg_select_site/', WFcfg_select_site, name='WFcfg_select_site'),
+    path('WFsql/', execute_sql, name='sql'),
 
 
     # Matches any html file

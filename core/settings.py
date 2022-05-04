@@ -4,6 +4,8 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 import os
+import django
+
 from decouple import config
 from unipath import Path
 
@@ -69,12 +71,30 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': 'db.sqlite3',
+#    }
+#}
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
-    }
+     'default': {
+      	  'ENGINE': 'django.db.backends.mysql',
+    	  'OPTIONS': {
+        	'read_default_file': '/etc/mysql/reader.cnf',
+	   }
+         },
+     'auth_db': {
+      	  'ENGINE': 'django.db.backends.mysql',
+    	  'OPTIONS': {
+        	'read_default_file': '/etc/mysql/ct_gui.cnf',
+	   }
+         }
 }
+DATABASE_ROUTERS = [
+    'apps.home.routers.AuthRouter',                        
+]
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

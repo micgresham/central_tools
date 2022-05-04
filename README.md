@@ -23,9 +23,9 @@ This user will have access to the /admin/ user and group functions
 <br>
 rm -rf db.sqlite3<br>
 
-## create the db and load the default build
+## create the superuser
 <br>
-sqlite3 db.sqlite3 < central-tools_default.sql<br>
+python manage.py createsuperuser
 
 ## Start the application (development mode)
 <br>

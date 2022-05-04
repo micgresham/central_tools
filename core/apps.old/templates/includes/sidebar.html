@@ -1,0 +1,71 @@
+
+    <nav class="pcoded-navbar">
+        <div class="navbar-wrapper">
+            <div class="navbar-brand header-logo">
+                    <span class="b-title">Central Tools</span>
+                </a>
+                <a class="mobile-menu" id="mobile-collapse" href="javascript:"><span></span></a>
+            </div>
+            <div class="navbar-content scroll-div">
+                <ul class="nav pcoded-inner-navbar">
+                    <li class="nav-item pcoded-menu-caption">
+                        <label>Navigation</label>
+                    </li>
+                    <li data-username="dashboard Default Ecommerce CRM Analytics Crypto Project" 
+                        class="nav-item {% if 'index' in segment %} active {% endif %}">
+                        <a href="/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span class="pcoded-mtext">Home</span></a>
+                    </li>
+                    <li class="nav-item pcoded-menu-caption">
+                        <label>Tasks</label>
+                    </li>
+                    <li data-username="Create template group and upload a template" 
+                        class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
+                        <a href="/create_tgroup/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">Create TG and Upload Template</span></a>
+                    </li>
+                    <li data-username="Create template multi group and upload a template" 
+                        class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
+                        <a href="/create_mtgroup/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">Create Multi TG and Upload Template</span></a>
+                    </li>
+                    <li data-username="Show Sites" 
+                        class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
+                        <a href="/show_sites/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">Show Sites</span></a>
+                    </li>
+                    <li data-username="Update Vars" 
+                        class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
+                        <a href="/WF1select_site/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">Update Vars</span></a>
+                    </li>
+                    <li data-username="Device Config" 
+                        class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
+                        <a href="/WFcfg_select_site/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">Device Config</span></a>
+                    </li>
+                    <li class="nav-item pcoded-menu-caption">
+                        <label>Sample Pages</label>
+                    </li>
+                    <li data-username="form elements advance componant validation masking wizard picker select" 
+                        class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
+                        <a href="/ui-forms.html" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">Form elements</span></a>
+                    </li>
+                    <li data-username="Sample Page" 
+                        class="nav-item {% if 'page-blank' in segment %} active {% endif %}">
+                        <a href="/page-blank.html" class="nav-link"><span class="pcoded-micon"><i class="feather icon-sidebar"></i></span><span class="pcoded-mtext">Sample page</span></a></li>
+                    <li class="nav-item pcoded-menu-caption">
+                        <label>Configuration</label>
+                    </li>
+                    <li data-username="Authentication Sign up Sign in reset password Change password Personal information profile settings map form subscribe" class="nav-item pcoded-hasmenu">
+                        <a href="javascript:" class="nav-link "><span class="pcoded-micon"><i class="feather icon-lock"></i></span><span class="pcoded-mtext">Settings</span></a>
+                        <ul class="pcoded-submenu">
+                            <li class=""><a href="/profile/" class="">Edit Profile</a></li>
+                            <li class=""><a href="/password-change/" class="">Change Password</a></li>
+                            <li class=""><a href="/admin/" class="">Admin Panel</a></li>
+                        </ul>
+                    </li>
+
+                    <li data-username="Disabled Menu" class="nav-item">
+                        <a href="{% url 'logout' %}" class="nav-link">
+                            <span class="pcoded-micon"><i class="feather icon-power"></i></span><span class="pcoded-mtext">Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>

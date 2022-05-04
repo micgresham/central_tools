@@ -1,0 +1,17 @@
+[Unit]
+Description=Airflow webserver daemon
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+EnvironmentFile=/etc/environment
+User=airflow
+Group=airflow
+Type=simple
+ExecStart= /usr/local/bin/airflow webserver
+Restart=on-failure
+RestartSec=5s
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

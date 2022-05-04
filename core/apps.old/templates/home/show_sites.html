@@ -1,0 +1,57 @@
+{% extends "layouts/base.html" %}
+{% block title %}Show Sites{% endblock title %}
+{% block content %}
+ <div class="pcoded-content">
+    {% csrf_token %}
+    <div class="card">
+      <div class="card-header">
+        <h5>Sites </h5>
+      </div>
+     <div class "card-body">
+      <div class="col-md-6">
+       <form method="post" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button type="submit" value="Filter" class="btn btn-dark btn-lg">Filter</button>
+	<table class="table table-hover">
+	    <tr>
+		<th>Site ID</th>
+		<th>Site Name
+                  <br>
+                  <input type="text" class="form-control" aria-label="Small" aria-describedby="site_name" id="site_name" name="site_name">
+                </th>
+		<th>Address
+                  <br>
+                  <input type="text" class="form-control" aria-label="Small" aria-describedby="address" id="address" name="address">
+                </th>
+		<th>City
+                  <br>
+                  <input type="text" class="form-control" aria-label="Small" aria-describedby="city" id="city" name="city">
+                </th>
+		<th>State
+                  <br>
+                  <input type="text" class="form-control" aria-label="Small" aria-describedby="state" id="state" name="state">
+                </th>
+		<th>Zip
+                  <br>
+                  <input type="text" class="form-control" aria-label="Small" aria-describedby="zip" id="zip" name="zip">
+                </th>
+		<th>Device Count</th>
+	    </tr>
+	    {% for item in query_results %}
+	    <tr> 
+		<td>{{ item.site_id }}</td>
+		<td>{{ item.site_name }}</td>
+		<td>{{ item.address }}</td>
+		<td>{{ item.city }}</td>
+		<td>{{ item.state }}</td>
+		<td>{{ item.zipcode }}</td>
+		<td>{{ item.associated_device_count }}</td>
+	    </tr>
+	    {% endfor %}
+	</table>
+
+        </div>
+     </div>
+   </div>
+ </div>
+{% endblock content %}

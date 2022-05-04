@@ -24,6 +24,7 @@ class Profile(models.Model):
          central_client_secret = models.CharField(max_length=100, default='')
          central_token = models.CharField(max_length=100, default='')
          central_refresh_token = models.CharField(max_length=100, default='')
+         central_tokenID = models.CharField(max_length=100, default='')
          
 
          def __str__(self):
@@ -45,20 +46,25 @@ class Profile(models.Model):
                 img.save(self.avatar.path)
 
 class CentralSites(models.Model):
+    customer_id = models.CharField(max_length=100)
+    customer_name = models.CharField(max_length=100, blank=True, null=True)
+    site_id = models.CharField(max_length=25)
+    site_name = models.CharField(primary_key=True, max_length=100)
+    address = models.CharField(max_length=200, blank=True, null=True)
+    associated_device_count = models.IntegerField(blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    postal_code = models.CharField(max_length=50, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    latitude = models.CharField(max_length=20, blank=True, null=True, default="0")
+    longitude = models.CharField(max_length=20, blank=True, null=True, default="0")
+    name = models.CharField(max_length=20, blank=True, null=True)
+    tags = models.CharField(max_length=200, blank=True, null=True)
+    last_refreshed = models.DateTimeField(blank=True, null=True)
 
-    key=models.CharField(primary_key=True, max_length=200)
-    username=models.CharField(max_length=200)
-    site_id=models.CharField(max_length=25)
-    address=models.CharField(max_length=200)
-    associated_device_count=models.CharField(max_length=25,blank=True, default="0")
-    city=models.CharField(max_length=100)
-    country=models.CharField(max_length=100)
-    latitude=models.CharField(max_length=50, null=True, default="0")
-    longitude=models.CharField(max_length=50, null=True, default="0")
-    site_details=jsonfield.JSONField()
-    site_name=models.CharField(max_length=101)
-    state=models.CharField(max_length=100)
-    tags=models.CharField(max_length=100, blank=True, null=True)
-    zipcode=models.CharField(max_length=50, default="00000")
+    class Meta:
+        managed = False
+        db_table = 'sites'
+        unique_together = (('customer_id', 'site_id'),)
 
 

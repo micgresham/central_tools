@@ -1,0 +1,22 @@
+{% extends "layouts/base.html" %}
+{% block title %}WF1{% endblock title %}
+{% block content %}
+ <div class="pcoded-content">
+    {% csrf_token %}
+    <div class="card">
+      <div class="card-header">
+        <h5>Update Variables (WF1) </h5>
+      </div>
+     <div class "card-body">
+      <div class="col-md-6">
+<form method="POST" enctype="multipart/form-data">
+ <div class="form-group">
+    {{ form }}
+    {% csrf_token %}
+ </div>
+    <input type = "submit" value = "{{ submit_button }}">
+</form>
+     </div>
+   </div>
+ </div>
+{% endblock content %}

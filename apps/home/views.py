@@ -155,3 +155,4 @@ def profile(request):
 import apps.home.WFtg
 import apps.home.WF1
 import apps.home.WFcfg
+import apps.home.WFsql
