@@ -1,0 +1,5 @@
+[client]
+database = central_tools_admin
+user = CT_GUI 
+password  = .P3bK9c!
+default-character-set = utf8

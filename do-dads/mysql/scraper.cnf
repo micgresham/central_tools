@@ -1,0 +1,5 @@
+[client]
+database = central_tools
+user = scraper
+password = H0ngK0ngPh003y!
+default-character-set = utf8

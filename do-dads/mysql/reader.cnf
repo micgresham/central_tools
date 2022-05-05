@@ -1,0 +1,5 @@
+[client]
+database = central_tools
+user = reader
+password = Sc00byd00!
+default-character-set = utf8
