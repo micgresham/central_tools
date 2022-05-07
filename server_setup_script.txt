@@ -33,6 +33,7 @@
 /usr/bin/sudo /usr/bin/apt -y install python3-cupshelpers
 /usr/bin/sudo /usr/bin/apt -y install python3-dbus
 /usr/bin/sudo /usr/bin/apt -y install python3-dev
+/usr/bin/sudo /usr/bin/apt -y install python3-dev default-libmysqlclient-dev build-essential
 /usr/bin/sudo /usr/bin/apt -y install python3-distro
 /usr/bin/sudo /usr/bin/apt -y install python3-distutils
 /usr/bin/sudo /usr/bin/apt -y install python3-gdbm:amd64
@@ -56,7 +57,9 @@
 /usr/bin/sudo /usr/bin/apt -y install python3.8-dev
 /usr/bin/sudo /usr/bin/apt -y install python3.8-minimal
 /usr/bin/sudo /usr/bin/apt -y install python3-virtualenv
-
+/usr/bin/sudo /usr/bin/apt -y install python3.10-venv
+/usr/bin/sudo /usr/bin/apt -y install nginx
+/usr/bin/sudo /usr/bin/apt -y install gunicorn
 
 /usr/bin/echo "============================================================"
 /usr/bin/echo " Installing directory structure and adding users......"
@@ -65,8 +68,8 @@
 /usr/bin/sudo /usr/sbin/adduser --system --group --home /opt/central_tools central_tools
 /usr/bin/sudo /usr/sbin/adduser --system --ingroup central_tools --home /opt/airflow airflow
 /usr/bin/sudo mkdir /opt/central_tools
-/usr/bin/sudo /usr/bin/chown central_tools /opt/central_tools/
-/usr/bin/sudo /usr/bin/chgrp central_tools /opt/central_tools/
+/usr/bin/sudo /usr/bin/chown central_tools:central_tools /opt/central_tools/
+
 
 /usr/bin/sudo /usr/bin/systemctl stop apparmor
 /usr/bin/sudo /usr/bin/systemctl disable apparmor
@@ -74,11 +77,11 @@
 
 
 /usr/bin/echo "============================================================"
-/usr/bin/echo " Setting up Central Tools......"
+/usr/bin/echo " Central Tools pre work......"
 /usr/bin/echo "============================================================"
-
-
-<work to be done here>
+cd /opt/
+/usr/bin/sudo /usr/bin/git clone https://github.com/micgresham/central_tools.git
+/usr/bin/sudo /usr/bin/chown -R central_tools:central_tools /opt/central_tools/
 
 /usr/bin/echo "============================================================"
 /usr/bin/echo " Setting up mysql......"
@@ -88,7 +91,11 @@
 /usr/bin/sudo mkdir /opt/mysql/mysql/data
 /usr/bin/sudo /usr/bin/chown -R mysql:mysql /opt/mysql/
 /usr/bin/sudo /usr/bin/chmod -R 750 /opt/mysql/
-/usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf
+/usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/mysql/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf
+/usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/mysql/reader.cnf /etc/mysql/reader.cnf
+/usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/mysql/scraper.cnf /etc/mysql/scraper.cnf
+/usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/mysql/ct_gui_admin.cnf /etc/mysql/ct_gui_admin.cnf
+/usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/mysql/ct_gui.cnf /etc/mysql/ct_gui.cnf
 
 /usr/bin/echo "Initializing the mySQL system...."
 /usr/bin/sudo -u mysql /usr/sbin/mysqld --initialize --user=mysql --basedir=/opt/mysql --datadir=/opt/mysql/data
@@ -102,6 +109,42 @@
 /usr/bin/echo ""
 /usr/bin/echo "Importing Central Tools schema...."
 /usr/bin/mysql -u root -p < /opt/central_tools/central_tools.sql
+/usr/bin/mysql -u root -p < /opt/central_tools/users.sql
+
+/usr/bin/echo "============================================================"
+/usr/bin/echo " Setting up Central Tools......"
+/usr/bin/echo "============================================================"
+cd /opt/central_tools
+/usr/bin/sudo /usr/bin/python3 -m venv env
+ source env/bin/activate
+/usr/bin/pip3 install django==3.2.6
+/usr/bin/pip3 install -r requirements.txt
+/usr/bin/python3 manage.py makemigrations 
+/usr/bin/python3 manage.py migrate --database=auth_db
+/usr/bin/echo " "
+/usr/bin/echo "Create an account for the Central Tools administrator:"
+/usr/bin/python3 manage.py createsuperuser --database=auth_db
+
+#needed for gunicorn
+/usr/bin/sudo /usr/bin/pip install mysqlclient
+/usr/bin/sudo /usr/bin/pip install pil
+/usr/bin/sudo /usr/bin/pip install Pillow
+/usr/bin/sudo /usr/bin/pip install jsonfield
+/usr/bin/sudo /usr/bin/pip install whitenoise
+
+/usr/bin/sudo -u central_tools -s
+export MY_IP=`/usr/bin/hostname -I | /usr/bin/sed -r 's/( )+//g'` 
+/usr/bin/envsubst '$MY_IP' < /opt/central_tools/do-dads/nginx/sites-available/central_tools.orig > /opt/central_tools/do-dads/nginx/sites-available/central_tools
+exit
+
+/usr/bin/sudo /usr/bin/cp -R /opt/central_tools/do-dads/nginx /etc
+/usr/bin/sudo /usr/bin/rm -rf /etc/nginx/sites-available/*.orig
+/usr/bin/sudo ln -s /etc/nginx/sites-available/central_tools /etc/nginx/sites-enabled
+
+/usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/gunicorn.service  /etc/systemd/system/gunicorn.service
+/usr/bin/sudo /usr/bin/systemctl enable gunicorn.service
+/usr/bin/sudo /usr/bin/systemctl start nginx
+/usr/bin/sudo /usr/bin/systemctl start gunicorn.service
 
 
 /usr/bin/echo "============================================================"

@@ -1,0 +1,13 @@
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '.Buttercup!';
+FLUSH PRIVILEGES;
+
+CREATE USER 'scraper'@'localhost' IDENTIFIED BY 'H0ngK0ngPh003y!';
+GRANT INSERT, UPDATE, DELETE, SELECT, REFERENCES on central_tools.* TO 'scraper'@'localhost';
+
+CREATE USER 'reader'@'localhost' IDENTIFIED BY 'Sc00byd00!';
+GRANT CREATE TEMPORARY TABLES,CREATE VIEW,EXECUTE,INDEX,REFERENCES,SELECT,SHOW VIEW on central_tools.* TO 'reader'@'localhost';
+
+CREATE USER 'CT_GUI'@'localhost' IDENTIFIED BY '.P3bK9c!';
+GRANT INSERT, UPDATE, DELETE, SELECT, EXECUTE, SHOW VIEW, REFERENCES, INDEX, CREATE VIEW on central_tools.* TO 'CT_GUI'@'localhost';
+FLUSH PRIVILEGES;
+

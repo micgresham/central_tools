@@ -1,16 +1,15 @@
 server {
     listen 80;
-    server_name 10.82.97.8;
+    server_name $MY_IP;
 
     location = /favicon.ico { access_log off; log_not_found off; }
     location /static/ {
-        root /home/mgresham/central_tools/apps;
+        root /opt/central_tools/apps;
     }
 
     location / {
         include proxy_params;
         proxy_read_timeout 1000;
-        proxy_pass http://unix:/home/mgresham/central_tools/core/core.sock;
+        proxy_pass http://unix:/tmp/core.sock;
     }
 }
-
