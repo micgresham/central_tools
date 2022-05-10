@@ -1,0 +1,14 @@
+---
+# - name: Install Dependencies
+#   gather_facts: no
+#   become: yes
+#   hosts: central_tools_servers
+#   roles:
+#     - role: set_up_server
+
+- name: Set up Central Tools
+  gather_facts: no
+  become: yes
+  hosts: central_tools_servers
+  roles:
+    - role: set_up_central_tools

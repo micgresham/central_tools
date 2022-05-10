@@ -1,0 +1,15 @@
+---
+all:
+  hosts:
+    mayhem_local:
+      ansible_port: 22
+      ansible_host: 192.168.56.99
+      ansible_user: opus 
+
+  children:
+    central_tools_servers:
+      hosts:
+        mayhem_local:
+          vars:
+            web_port: 8080
+            directory: opt

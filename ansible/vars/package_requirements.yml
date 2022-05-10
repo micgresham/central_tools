@@ -1,0 +1,92 @@
+required:
+    gunicorn:
+        version: latest
+    pycodestyle:
+        version: latest
+    libmysqlclient-dev:
+        version: latest
+    mysql-client:
+        version: latest
+    mysql-common:
+        version: latest  
+    mysql-server:
+        version: latest
+    python3:
+        version: latest        
+    nginx:
+        version: latest
+    libmysqlclient21:
+        version: latest
+    python3-apt:
+        version: latest
+    python3-certifi:
+        version: latest
+    python3-cffi-backend:
+        version: latest
+    python3-chardet:
+        version: latest
+    python3-click:
+        version: latest
+    python3-colorama:
+        version: latest
+    python3-commandnotfound:
+        version: latest
+    python3-cryptography:
+        version: latest
+    python3-cupshelpers:
+        version: latest
+    python3-dbus:
+        version: latest
+    python3-dev:
+        version: latest
+    python3-distro:
+        version: latest
+    python3-distutils:
+        version: latest
+    python3-gdbm:amd64:
+        version: latest
+    python3-gi:
+        version: latest
+    python3-idna:
+        version: latest
+    python3-ldb:
+        version: latest
+    python3-lib2to3:
+        version: latest
+    python3-minimal:
+        version: latest
+    python3-netifaces:
+        version: latest
+    python3-pip:
+        version: latest
+    python3-pkg-resources:
+        version: latest
+    python3-requests:
+        version: latest
+    python3-setuptools:
+        version: latest
+    python3-six:
+        version: latest
+    python3-talloc:
+        version: latest
+    python3-urllib3:
+        version: latest
+    python3-wheel:
+        version: latest
+    python3-xkit:
+        version: latest
+    python3-yaml:
+        version: latest
+    python3.8:
+        version: latest
+    python3.8-dev:
+        version: latest
+    python3.8-minimal:
+        version: latest
+    python3-virtualenv:
+        version: latest
+    python3-pymysql:
+        version: latest
+purge:
+    apparmor:
+        reboot: y
