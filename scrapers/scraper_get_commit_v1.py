@@ -163,49 +163,45 @@ data_dict = get_DB_devices()
 
 cnx = mysql.connector.connect(option_files='/etc/mysql/scraper.cnf')
 cursor = cnx.cursor()
-count = 0
-remaining = len(data_dict)
-serials = ''
 if (len(data_dict) > 0):
   # iterate all the nested dictionaries with keys
   for i in data_dict:
-    serials = serials + i['serial']
-    count = count + 1
-    remaining = remaining - 1
-#    print(count,i['serial'],' remaining:',remaining)
-    if (count > 49 or remaining < 1):
-#      print(remaining)
-      count=0
-      data2 = get_device_commit_status (central,serials)
-      if data2['status_code'] == 401:
-          print("=============================")
-          print(" Reauthenticating to Central")
-          print("=============================")
-          central_info = test_central(userID)
-          central = ArubaCentralBase(central_info=central_info, ssl_verify=ssl_verify)
-          data2 = get_device_commit_status (central,serial)
-      elif data2['status_code'] == 500:
-          print("Got the dreaded Internal Server Error...sleeping 10 seconds and trying again")
-          time.sleep(10)
-          data2 = get_device_commit_status (central,serial)
+    serial = i['serial']
+    site_name = i['site_name']
+    data2 = get_device_commit_status (central,serial)
+    if data2['status_code'] == 401:
+        print("=============================")
+        print(" Reauthenticating to Central")
+        print("=============================")
+        central_info = test_central(userID)
+        central = ArubaCentralBase(central_info=central_info, ssl_verify=ssl_verify)
+        data2 = get_device_commit_status (central,serial)
+    elif data2['status_code'] == 500:
+        print("Got the dreaded Internal Server Error...sleeping 10 seconds and trying again")
+        time.sleep(10)
+        data2 = get_device_commit_status (central,serial)
+  
 
-#      print("---------------")
-#      print(data2)
-      serials = ''
-      for j in data2['data']:
-        auto_commit_state = j['auto_commit_state'] 
-        serial = j['serial'] 
-
-        query = "UPDATE central_tools.devices SET auto_commit_state = '{0}' WHERE serial = '{1}'".format(auto_commit_state,serial) 
-#        print("------------------------")
-#        print(query)
-
-        cursor.execute(query)
-        cnx.commit()
-
+    print("---------------")
+    print(data2)
+    print(data2['data'])
+    if data2['data'] != []:
+      if "auto_commit_state" in data2['data'][0]:
+       auto_commit_state = data2['data'][0]['auto_commit_state']
+      else:
+         auto_commit_state = "Unknown"
     else:
-      serials = serials + ","
+      auto_commit_state = "Unknown"
+     
     
+    query = "UPDATE central_tools.devices SET auto_commit_state = '{0}' WHERE serial = '{1}'".format(auto_commit_state,serial) 
+     
+
+    print("------------------------")
+    print(query)
+
+    cursor.execute(query)
+    cnx.commit()
      
 cursor.close()
 cnx.close()
