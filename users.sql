@@ -1,4 +1,4 @@
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '.Buttercup!';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '.Butt3rcup!';
 FLUSH PRIVILEGES;
 
 CREATE USER 'scraper'@'localhost' IDENTIFIED BY 'H0ngK0ngPh003y!';
@@ -11,3 +11,6 @@ CREATE USER 'CT_GUI'@'localhost' IDENTIFIED BY '.P3bK9c!';
 GRANT INSERT, UPDATE, DELETE, SELECT, EXECUTE, SHOW VIEW, REFERENCES, INDEX, CREATE VIEW on central_tools.* TO 'CT_GUI'@'localhost';
 FLUSH PRIVILEGES;
 
+CREATE USER 'CT_GUI'@'localhost' IDENTIFIED BY '.P3bK9c!';
+GRANT INSERT, UPDATE, DELETE, SELECT, EXECUTE, SHOW VIEW, REFERENCES, INDEX, CREATE VIEW on central_tools_admin.* TO 'CT_GUI'@'localhost';
+FLUSH PRIVILEGES;
