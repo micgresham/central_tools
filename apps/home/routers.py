@@ -41,9 +41,6 @@ class AuthRouter(object):
         """
         Allow relations if a model in the auth app is involved.
         """
-        print("-------IN DB ROUTER-------")
-        print(model._meta.app_label)
-        print("--------------------------") 
         if obj1._meta.app_label in self.route_app_labels or \
            obj2._meta.app_label == 'home':
            return True

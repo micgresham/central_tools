@@ -21,8 +21,11 @@ export myPasswd=`echo $myPasswd | sed 's/ *$//g'`
 sleep 5
 /usr/bin/echo " "
 /usr/bin/echo " "
+/usr/bin/sudo systemctl start mysql
+sleep 5
 /usr/bin/echo "Random temporary password is: $myPasswd"
 /usr/bin/echo "Your mysql root password has been changed to .Buttercup!"
+/usr/bin/mysql -u root -p$myPasswd --connect-expired-password --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '.Butt3rcup!';"
 /usr/bin/echo "****** Your should change this to something more secure!! ******"
 /usr/bin/echo " "
 /usr/bin/echo "To change you root password:"
@@ -30,8 +33,8 @@ sleep 5
 /usr/bin/echo "      ALTER USER 'root'@'localhost' IDENTIFIED BY 'NewPassword'"
 /usr/bin/echo ""
 /usr/bin/echo "Importing Central Tools schema...."
-/usr/bin/mysql --connect-expired-password -u root -p$myPasswd < /opt/central_tools/users.sql
+/usr/bin/mysql -u root -p.Butt3rcup! < /opt/central_tools/central_tools.sql
+/usr/bin/mysql -u root -p.Butt3rcup! < /opt/central_tools/users.sql
 /usr/bin/echo " "
 /usr/bin/echo " "
-/usr/bin/mysql -u root -p.Buttercup! < /opt/central_tools/central_tools.sql
 

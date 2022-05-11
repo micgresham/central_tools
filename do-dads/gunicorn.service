@@ -6,7 +6,7 @@ After=network.target
 User=central_tools
 Group=www-data
 WorkingDirectory=/opt/central_tools
-ExecStart=/usr/local/bin/gunicorn --access-logfile - --timeout 250  --workers 5 --bind unix:/tmp/core.sock core.wsgi:application
+ExecStart=/usr/bin/gunicorn --access-logfile - --timeout 250  --workers 5 --bind unix:/tmp/core.sock core.wsgi:application
 
 [Install]
 WantedBy=multi-user.target

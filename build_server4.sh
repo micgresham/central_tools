@@ -17,18 +17,19 @@ cd /opt/central_tools
  /usr/bin/sudo /usr/bin/pip install Pillow
  /usr/bin/sudo /usr/bin/pip install jsonfield
  /usr/bin/sudo /usr/bin/pip install whitenoise
+ /usr/bin/sudo /usr/bin/pip install decouple
 
- /usr/bin/sudo -u central_tools -s
- export MY_IP=`/usr/bin/hostname -I | /usr/bin/sed -r 's/( )+//g'` 
- /usr/bin/envsubst '$MY_IP' < /opt/central_tools/do-dads/nginx/sites-available/central_tools.orig > /opt/central_tools/do-dads/nginx/sites-available/central_tools
- exit
+export MY_IP=`/usr/bin/hostname -I | /usr/bin/sed -r 's/( )+//g'`
+# /usr/bin/sudo --preserve-env=MY_IP -u central_tools tee -a /usr/bin/envsubst '$MY_IP' < /opt/central_tools/do-dads/nginx/sites-available/central_tools.orig > /opt/central_tools/do-dads/nginx/sites-available/central_tools'
 
- /usr/bin/sudo /usr/bin/cp -R /opt/central_tools/do-dads/nginx /etc
- /usr/bin/sudo /usr/bin/rm -rf /etc/nginx/sites-available/*.orig
- /usr/bin/sudo ln -s /etc/nginx/sites-available/central_tools /etc/nginx/sites-enabled
+/usr/bin/sudo /usr/bin/cp -R /opt/central_tools/do-dads/nginx /etc
+/usr/bin/sudo /usr/bin/sed -i 's/@@MY_IP@@/'"$MY_IP"'/' /etc/nginx/sites-available/central_tools.orig
+/usr/bin/sudo /usr/bin/mv /etc/nginx/sites-available/central_tools.orig /etc/nginx/sites-available/central_tools
 
- /usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/gunicorn.service  /etc/systemd/system/gunicorn.service
- /usr/bin/sudo /usr/bin/systemctl enable gunicorn.service
- /usr/bin/sudo /usr/bin/systemctl start nginx
- /usr/bin/sudo /usr/bin/systemctl start gunicorn.service
+/usr/bin/sudo ln -s /etc/nginx/sites-available/central_tools /etc/nginx/sites-enabled
+
+/usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/gunicorn.service  /etc/systemd/system/gunicorn.service
+/usr/bin/sudo /usr/bin/systemctl enable gunicorn.service
+/usr/bin/sudo /usr/bin/systemctl start nginx
+/usr/bin/sudo /usr/bin/systemctl start gunicorn.service
  
