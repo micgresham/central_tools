@@ -17,6 +17,7 @@ cd /opt/central_tools
  /usr/bin/sudo /usr/bin/pip install Pillow
  /usr/bin/sudo /usr/bin/pip install jsonfield
  /usr/bin/sudo /usr/bin/pip install whitenoise
+ /usr/bin/sudo /usr/bin/pip uninstall decouple
  /usr/bin/sudo /usr/bin/pip3 install python-decouple
  /usr/bin/sudo /usr/bin/pip3 install unipath
 
