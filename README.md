@@ -1,41 +1,16 @@
+#Central Tools
+
+Central Tools is a tool framework designed to work with Aruba's Central management platform.<br>  
+Central Tools performs two (2) primary functions:<br>
+
+<li>Collection of data using "scrapers" and stores it to an interchange database.  This allows for rapid queries of without the penalty of API calls and the use of complex SQL statements</li>
+<li>A framework for "workflow" tasks to speed certain activities normally done via the Central gui."
+
+<p>Aruba Central is a product of HPE/Aruba and is copyright/trademark HPE/Aruba.  Central Tools interacts with Aruba Central as an end user in accordance with the Central EULA.</p>
+
 # Initial setup
 
-## Get the code
-<br>
-git clone https://github.com/micgresham/central_tools.git<br>
-cd central-tools<br>
-
-## Virtualenv modules installation (Unix based systems)
-<br>
-python3 -m venv env<br>
-source env/bin/activate<br>
-pip3 install django==3.2.6<br>
-pip3 install -r requirements.txt<br>
-
-## Build the default database with the built-in admin superuser
-<br>
-Username: admin<br>
-Password: aruba123<br>
-<br>
-This user will have access to the /admin/ user and group functions
-
-## purge the database (if it exists)
-<br>
-rm -rf db.sqlite3<br>
-
-## create the superuser
-<br>
-python manage.py createsuperuser
-
-## Start the application (development mode)
-<br>
-python manage.py runserver # default port 8000<br>
-
-## Start the app - custom port
-<br>
-python manage.py runserver 0.0.0.0:your_port <br>
-<br>
-Access the web app in browser: http://127.0.0.1:8000/<br>
+Please review the build_server scripts 1-5.  These will install and configure Central Tools along with mySQL and Apache Airflow.
 
 
 ## Howto add tasks
