@@ -4,10 +4,10 @@
     name: packages
     file: "{{playbook_dir}}/vars/package_requirements.yml"
 
-- name: Debug package list
-  debug:
-    msg: "{{item.key}} - {{item.value.version}}"
-  loop: "{{packages.required|dict2items}}"
+# - name: Debug package list
+#   debug:
+#     msg: "{{item.key}} - {{item.value.version}}"
+#   loop: "{{packages.required|dict2items}}"
 
 - name: Install Required Packages
   package:

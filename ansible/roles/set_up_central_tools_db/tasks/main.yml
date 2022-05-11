@@ -1,0 +1,144 @@
+---
+- name: Delete existing central tools repo only if fixer is set
+  file:
+    path: "/{{vars.vars.directory}}/central_tools"
+    state: absent
+  when: fixer is defined
+
+- name: Git Central Tools Repo
+  git:
+    repo: 'https://github.com/micgresham/central_tools.git'
+    dest: "/{{vars.vars.directory}}/central_tools"
+    update: no
+
+- name: Add central_tools group
+  group:
+    name: central_tools
+    state: present
+
+- name: Add central_tools user
+  user:
+    name: central_tools
+    home: "/{{vars.vars.directory}}/central_tools"
+    create_home: True
+    group: central_tools
+    system: True
+
+- name: Add airflow user
+  user:
+    name: airflow
+    home: "/{{vars.vars.directory}}/airflow"
+    create_home: True
+    group: central_tools
+    append: yes
+    system: True 
+
+- name: Change ownership
+  file:
+    recurse: yes
+    path: "/{{vars.vars.directory}}/central_tools"
+    owner: central_tools
+    group: central_tools
+    state: directory
+
+- name: Stop mysql
+  service:
+    name: mysql
+    state: stopped
+
+- name: Make Directories
+  file:
+    path: "/{{vars.vars.directory}}/{{item}}"
+    owner: mysql
+    group: mysql
+    state: directory
+    mode: '0755'
+  loop:
+    - mysql
+    - mysql/data
+
+- name: Copy Stuff Over
+  copy:
+    src: "/{{vars.vars.directory}}/{{item.src}}"
+    dest: "/{{item.dest}}"
+    remote_src: yes
+  loop:
+    - {src: 'central_tools/do-dads/mysql/mysqld.cnf', dest: '/etc/mysql/mysql.conf.d/mysqld.cnf'}  
+    - {src: 'central_tools/do-dads/mysql/reader.cnf', dest: '/etc/mysql/reader.cnf'}
+    - {src: 'central_tools/do-dads/mysql/scraper.cnf', dest: '/etc/mysql/scraper.cnf'}
+    - {src: 'central_tools/do-dads/mysql/ct_gui_admin.cnf', dest: '/etc/mysql/ct_gui_admin.cnf'}
+    - {src: 'central_tools/do-dads/mysql/ct_gui.cnf', dest: '/etc/mysql/ct_gui.cnf'}
+
+# note - ignore errors is on in case db has already been initialize
+- name: Initialize mysql
+  command: /usr/bin/sudo -u mysql /usr/sbin/mysqld --initialize --user=mysql --basedir=/opt/mysql --datadir=/opt/mysql/data
+  ignore_errors: yes
+
+- name: Get password
+  shell: "grep 'A temporary password is generated for root@localhost' /var/log/mysql/error.log | awk -F ' ' '{print $(NF)}'"
+  register: password
+
+- name: Start mysql
+  service:
+    name: mysql
+    state: started  
+
+- name: debug
+  debug:
+    var: password
+
+- name: Change password
+  command: mysql --user root --password={{password.stdout}} --connect-expired-password --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '.Butt3rcup!';"
+  ignore_errors: yes
+
+- name: Delete tables
+  ignore_errors: yes
+  mysql_db:
+    state: absent
+    name: 
+      - central_tools
+      - central_tools_admin
+    login_user: root
+    login_password: .Butt3rcup!
+
+- name: Import central_tools
+  mysql_db:
+    state: import
+    target: "/{{vars.vars.directory}}/central_tools/central_tools.sql"
+    name: all
+    login_user: root
+    login_password: .Butt3rcup!
+
+- name: Delete User scraper
+  mysql_user:
+    login_user: root
+    login_password: .Butt3rcup!
+    name: scraper
+    host_all: yes
+    state: absent 
+
+- name: Delete User reader
+  mysql_user:
+    login_user: root
+    login_password: .Butt3rcup!
+    name: reader
+    host_all: yes
+    state: absent 
+
+- name: Delete User CT_GUI
+  mysql_user:
+    login_user: root
+    login_password: .Butt3rcup!
+    name: CT_GUI
+    host_all: yes
+    state: absent            
+
+- name: Import Users
+  ignore_errors: yes
+  mysql_db:
+    state: import
+    target: "/{{vars.vars.directory}}/central_tools/users.sql"
+    name: central_tools
+    login_user: root
+    login_password: .Butt3rcup!
+

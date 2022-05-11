@@ -6,9 +6,23 @@
 #   roles:
 #     - role: set_up_server
 
-- name: Set up Central Tools
+- name: Set up Central Tools - Database
   gather_facts: no
   become: yes
   hosts: central_tools_servers
   roles:
-    - role: set_up_central_tools
+    - role: set_up_central_tools_db
+
+- name: Set up Central Tools - CT
+  gather_facts: no
+  become: yes
+  hosts: central_tools_servers
+  roles:
+    - role: set_up_central_tools    
+
+# - name: Set up Central Tools - Airflow
+#   gather_facts: no
+#   become: yes
+#   hosts: central_tools_servers
+#   roles:
+#     - role: set_up_central_tools_airflow    

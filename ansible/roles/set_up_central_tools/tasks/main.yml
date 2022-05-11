@@ -1,100 +1,48 @@
 ---
-- name: Delete existing central tools repo only if fixer is set
-  file:
-    path: "/{{vars.vars.directory}}/central_tools"
-    state: absent
-  when: fixer is defined
+- name: Install specified python requirements in virtualenv
+  pip:
+    requirements: "/{{vars.vars.directory}}/central_tools/requirements.txt"
+    virtualenv: "/{{vars.vars.directory}}/central_tools/env"
 
-- name: Git Central Tools Repo
-  git:
-    repo: 'https://github.com/micgresham/central_tools.git'
-    dest: "/{{vars.vars.directory}}/central_tools"
-    update: no
+- name: Run python scripts for requirements
+  command: "/{{vars.vars.directory}}/central_tools/env/bin/pip3 install -r /{{vars.vars.directory}}/central_tools/requirements.txt"
 
-- name: Add central_tools group
-  group:
-    name: central_tools
-    state: present
+- name: Run python scripts for makemigrations
+  command: "/{{vars.vars.directory}}/central_tools/env/bin/python3 /{{vars.vars.directory}}/central_tools/manage.py makemigrations"
 
-- name: Add central_tools user
-  user:
-    name: central_tools
-    home: "/{{vars.vars.directory}}/central_tools"
-    create_home: True
-    group: central_tools
-    system: True
+- name: Run python scripts to create db auth
+  command: "/{{vars.vars.directory}}/central_tools/env/bin/python3 /{{vars.vars.directory}}/central_tools/manage.py migrate --database=auth_db --fake"
 
-- name: Add airflow user
-  user:
-    name: airflow
-    home: "/{{vars.vars.directory}}/airflow"
-    create_home: True
-    group: central_tools
-    append: yes
-    system: True 
+- name: Run python scripts to create account
+  command: "/{{vars.vars.directory}}/central_tools/env/bin/python3 /{{vars.vars.directory}}/central_tools/manage.py createsuperuser --database=auth_db"  
 
-- name: Change ownership
-  file:
-    recurse: yes
-    path: "/{{vars.vars.directory}}/central_tools"
-    owner: central_tools
-    group: central_tools
-    state: directory
 
-- name: Stop mysql
-  service:
-    name: mysql
-    state: stopped
 
-- name: Make Directories
-  file:
-    path: "/{{vars.vars.directory}}/{{item}}"
-    owner: mysql
-    group: mysql
-    state: directory
-    mode: '0755'
-  loop:
-    - mysql
-    - mysql/data
+# /usr/bin/pip3 install django==3.2.6
+# /usr/bin/pip3 install -r requirements.txt
+# /usr/bin/python3 manage.py makemigrations 
+# /usr/bin/python3 manage.py migrate --database=auth_db
+# /usr/bin/echo " "
+# /usr/bin/echo "Create an account for the Central Tools administrator:"
+# /usr/bin/python3 manage.py createsuperuser --database=auth_db
 
-- name: Copy Stuff Over
-  copy:
-    src: "/{{vars.vars.directory}}/{{item.src}}"
-    dest: "/{{item.dest}}"
-    remote_src: yes
-  loop:
-    - {src: 'central_tools/do-dads/mysql/mysqld.cnf', dest: '/etc/mysql/mysql.conf.d/mysqld.cnf'}  
-    - {src: 'central_tools/do-dads/mysql/reader.cnf', dest: '/etc/mysql/reader.cnf'}
-    - {src: 'central_tools/do-dads/mysql/scraper.cnf', dest: '/etc/mysql/scraper.cnf'}
-    - {src: 'central_tools/do-dads/mysql/ct_gui_admin.cnf', dest: '/etc/mysql/ct_gui_admin.cnf'}
-    - {src: 'central_tools/do-dads/mysql/ct_gui.cnf', dest: '/etc/mysql/ct_gui.cnf'}
+ #needed for gunicorn
+# /usr/bin/sudo /usr/bin/pip install mysqlclient
+# /usr/bin/sudo /usr/bin/pip install Pillow
+# /usr/bin/sudo /usr/bin/pip install jsonfield
+# /usr/bin/sudo /usr/bin/pip install whitenoise
 
-- name: Initialize mysql
-  command: /usr/bin/sudo -u mysql /usr/sbin/mysqld --initialize --user=mysql --basedir=/opt/mysql --datadir=/opt/mysql/data
-  ignore_errors: yes
+#  /usr/bin/sudo -u central_tools -s
+#  export MY_IP=`/usr/bin/hostname -I | /usr/bin/sed -r 's/( )+//g'` 
+#  /usr/bin/envsubst '$MY_IP' < /opt/central_tools/do-dads/nginx/sites-available/central_tools.orig > /opt/central_tools/do-dads/nginx/sites-available/central_tools
+#  exit
 
-- name: Get password
-  shell: "grep 'A temporary password is generated for root@localhost' /var/log/mysql/error.log | awk -F ' ' '{print $(NF)}'"
-  register: password
+#  /usr/bin/sudo /usr/bin/cp -R /opt/central_tools/do-dads/nginx /etc
+#  /usr/bin/sudo /usr/bin/rm -rf /etc/nginx/sites-available/*.orig
+#  /usr/bin/sudo ln -s /etc/nginx/sites-available/central_tools /etc/nginx/sites-enabled
 
-- name: Start mysql
-  service:
-    name: mysql
-    state: started  
-
-- name: debug
-  debug:
-    var: password
-
-- name: Change password
-  command: mysql --user root --password={{password.stdout}} --connect-expired-password --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY 'Buttercup!';"
-  ignore_errors: yes
-
-- name: Import DB Schema
-  mysql_db:
-    state: import
-    target: "/{{vars.vars.directory}}/central_tools/users.sql"
-    name: central_tools
-    login_user: root
-    login_password: Buttercup!
+#  /usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/gunicorn.service  /etc/systemd/system/gunicorn.service
+#  /usr/bin/sudo /usr/bin/systemctl enable gunicorn.service
+#  /usr/bin/sudo /usr/bin/systemctl start nginx
+#  /usr/bin/sudo /usr/bin/systemctl start gunicorn.service
 
