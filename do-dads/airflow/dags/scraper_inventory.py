@@ -19,9 +19,9 @@ with DAG(
 ) as dag:
 	t1 = BashOperator( \
 	    task_id='inventory_switches', \
-	    bash_command='python3 /opt/central_tools/scrapers/scraper_devices.py --dev_type switch --userID scraper', \
+	    bash_command='python3 /home/mgresham/central_tools/scrapers/scraper_devices.py --dev_type switch --userID scraper', \
 	    dag=dag)
 	t2=  BashOperator( \
 	    task_id='inventory_aps', \
-	    bash_command='python3 /opt/central_tools/scrapers/scraper_devices.py --dev_type all_ap --userID scraper', \
+	    bash_command='python3 /home/mgresham/central_tools/scrapers/scraper_devices.py --dev_type all_ap --userID scraper', \
 	    dag=dag)
