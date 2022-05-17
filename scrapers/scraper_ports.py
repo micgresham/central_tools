@@ -5,6 +5,9 @@ import datetime
 import mysql.connector
 import json
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
 import re
 import time 
 
@@ -60,6 +63,13 @@ def get_switch_port_details (central, serial, loop_limit=0):
     # set initial vars
     print ("Getting switch port details for " + serial)
 
+    s = requests.Session()
+    retries = Retry(total=5,
+    backoff_factor=1,
+    status_forcelist=[ 502, 503, 504 ])
+    s.mount('https://', HTTPAdapter(max_retries=retries))
+    s.mount('http://', HTTPAdapter(max_retries=retries))
+
     access_token = central_info['token']['access_token']
     base_url = central_info['base_url']
     api_function_url = base_url + "monitoring/v1/switches/{0}/ports".format(serial)
@@ -73,7 +83,7 @@ def get_switch_port_details (central, serial, loop_limit=0):
     }
 
 #    print(api_function_url)
-    response = requests.request("GET", api_function_url, headers=qheaders, params=qparams)
+    response = s.request("GET", api_function_url, headers=qheaders, params=qparams)
 #    if "error" in response.json():
 #      return "{'ERROR'}"
 #    else:

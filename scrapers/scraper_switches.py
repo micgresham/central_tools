@@ -5,6 +5,8 @@ import datetime
 import mysql.connector
 import json
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 import re
 import time 
 
@@ -90,6 +92,15 @@ def get_switch_details (central, serial, loop_limit=0):
     # set initial vars
     print ("Getting config details for " + serial)
 
+    s = requests.Session()
+
+    retries = Retry(total=5,
+                backoff_factor=1,
+                status_forcelist=[ 502, 503, 504 ])
+
+    s.mount('https://', HTTPAdapter(max_retries=retries))
+    s.mount('http://', HTTPAdapter(max_retries=retries))
+
     access_token = central_info['token']['access_token']
     base_url = central_info['base_url']
     api_function_url = base_url + "/monitoring/v1/switches/{0}".format(serial)
@@ -103,7 +114,7 @@ def get_switch_details (central, serial, loop_limit=0):
     }
 
 #    print(api_function_url)
-    response = requests.request("GET", api_function_url, headers=qheaders, params=qparams)
+    response = s.request("GET", api_function_url, headers=qheaders, params=qparams)
 #    if "error" in response.json():
 #      return "{'ERROR'}"
 #    else:
@@ -121,9 +132,19 @@ def get_switch_details (central, serial, loop_limit=0):
       response_status = '{ "status_code": ' + str(response.status_code)  + '}' 
       j_result = json.loads(response_status) 
    
+    elif (response.status_code == 404):
+       print(response.text)
+       result_str = '{"chassis_type": "False", "cpu_utilization": 0, "default_gateway": "na", "device_mode": 0, "fan_speed": "Ok", "firmware_version": "na", "group_name": "na", "ip_address": "na", "labels": [], "macaddr": "na", "max_power": 0, "mem_free": 0, "mem_total": 0, "model": "na", "name": "na", "poe_consumption": "0", "power_consumption": 0, "na": "na", "serial": "na", "site": "na", "stack_id": "na", "status": "na", "switch_type": "na", "temperature": "0", "total_clients": 0, "updated_at": 0, "uplink_ports": [], "uptime": 0, "usage": 0}'
+       j_result = json.loads(result_str)
+       error_str = '{ "Error": 404, "Error_text": Page not found"}'
+       response_status = '{ "status_code": ' + str(response.status_code)  + '}' 
+       j_response_status = json.loads(response_status) 
+       j_error = json.loads(error_str)
+       j_result.update(j_error)
+       j_result.update(j_response_status)
+       print(response.headers)
     elif (response.status_code == 500):
        print(response.text)
-       error_str = '{ "Error": 1, "Error_text": "' + response.json()['description'] + '" }'
        result_str = '{"chassis_type": "False", "cpu_utilization": 0, "default_gateway": "na", "device_mode": 0, "fan_speed": "Ok", "firmware_version": "na", "group_name": "na", "ip_address": "na", "labels": [], "macaddr": "na", "max_power": 0, "mem_free": 0, "mem_total": 0, "model": "na", "name": "na", "poe_consumption": "0", "power_consumption": 0, "na": "na", "serial": "na", "site": "na", "stack_id": "na", "status": "na", "switch_type": "na", "temperature": "0", "total_clients": 0, "updated_at": 0, "uplink_ports": [], "uptime": 0, "usage": 0}'
        j_result = json.loads(result_str)
        error_str = '{ "Error": 1, "Error_text": "Internal server error"}'
@@ -152,6 +173,14 @@ def get_switch_details (central, serial, loop_limit=0):
 def get_stack_details (central,stack_id):
     # set initial vars
     print ("Getting stack details for " + stack_id)
+    s = requests.Session()
+
+    retries = Retry(total=5,
+                backoff_factor=1,
+                status_forcelist=[ 502, 503, 504 ])
+
+    s.mount('https://', HTTPAdapter(max_retries=retries))
+    s.mount('http://', HTTPAdapter(max_retries=retries))
 
     access_token = central_info['token']['access_token']
     base_url = central_info['base_url']
@@ -164,12 +193,7 @@ def get_stack_details (central,stack_id):
     qparams = {
     }
 
-#    print(api_function_url)
-    response = requests.request("GET", api_function_url, headers=qheaders, params=qparams)
-#    if "error" in response.json():
-#      return "{'ERROR'}"
-#    else:
-
+    response = s.request("GET", api_function_url, headers=qheaders, params=qparams)
 
     if (response.status_code == 200):
       response_status = '{ "status_code": ' + str(response.status_code)  + '}' 
@@ -310,7 +334,10 @@ if (len(data_dict) > 0):
         central = ArubaCentralBase(central_info=central_info, ssl_verify=ssl_verify)
         data2 = get_stack_details(central,stack_id)
   
-      commander_mac = data2['mac']
+      if 'mac' in data2:
+        commander_mac = data2['mac']
+      else:
+        commander_mac = ""
     else:
       commander_mac = ""
 

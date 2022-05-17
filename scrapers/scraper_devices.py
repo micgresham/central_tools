@@ -163,6 +163,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dev_type', \
                      default = 'ALL', \
                      help='Options are: switch, all_ap, all_controllers, vgw, cap, others. Default is ALL device types.')
+parser.add_argument('--lite',action='store_true') 
 parser.add_argument('--userID', \
                      default = 'scraper', \
                      help='Central Tools user ID to use for API access')
@@ -226,51 +227,50 @@ if (len(data_dict) > 0):
     serial = i['serial']
     services = json.dumps(i['services'])
     tier_type = i['tier_type']
-  
-    data2 = get_cfg_details(central,serial)
-    print(data2['status_code'])
-
-    if data2['status_code'] == 401:
-      print("=============================")
-      print(" Reauthenticating to Central")
-      print("=============================")
-      central_info = test_central(userID)
-      central = ArubaCentralBase(central_info=central_info, ssl_verify=ssl_verify)
+    if (not args.lite): 
       data2 = get_cfg_details(central,serial)
+      print(data2['status_code'])
 
-#    print(data2)
-#    time.sleep(1)
-    group_name = data2['Group']
-    configuration_error_status = sqlboolean(data2['Configuration_error_status'])  
-    override_status = sqlboolean(data2['Override_status'])
-    template_name = data2['Template_name']
-    template_hash = data2['Template_hash']
-    template_error_status = sqlboolean(data2['Template_error_status'])
-    error = data2['Error']
-    error_text = data2['Error_text']
+      if data2['status_code'] == 401:
+        print("=============================")
+        print(" Reauthenticating to Central")
+        print("=============================")
+        central_info = test_central(userID)
+        central = ArubaCentralBase(central_info=central_info, ssl_verify=ssl_verify)
+        data2 = get_cfg_details(central,serial)
   
-
-    queryU1 = "INSERT INTO central_tools.devices ( \
-		aruba_part_no, \
-		customer_id, \
-		customer_name, \
-		device_type, \
-		imei, \
-		macaddr, \
-		model, \
-		serial, \
-		services, \
-		tier_type, \
-		group_name, \
-		configuration_error_status, \
-		override_status, \
-		template_name, \
-		template_hash, \
-		template_error_status, \
+#        print(data2)
+#        time.sleep(1)
+        group_name = data2['Group']
+        configuration_error_status = sqlboolean(data2['Configuration_error_status'])  
+        override_status = sqlboolean(data2['Override_status'])
+        template_name = data2['Template_name']
+        template_hash = data2['Template_hash']
+        template_error_status = sqlboolean(data2['Template_error_status'])
+        error = data2['Error']
+        error_text = data2['Error_text']
+  
+        queryU1 = "INSERT INTO central_tools.devices ( \
+  		aruba_part_no, \
+  		customer_id, \
+  		customer_name, \
+  		device_type, \
+  		imei, \
+  		macaddr, \
+  		model, \
+  		serial, \
+  		services, \
+  		tier_type, \
+  		group_name, \
+  		configuration_error_status, \
+  		override_status, \
+  		template_name, \
+  		template_hash, \
+  		template_error_status, \
                 error, \
                 error_text, \
-		last_refreshed) \
-             VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}',\
+  		last_refreshed) \
+               VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}',\
 		'{10}','{11}','{12}','{13}','{14}','{15}','{16}','{17}',now())".format( \
 		aruba_part_no, \
 		customer_id, \
@@ -291,7 +291,7 @@ if (len(data_dict) > 0):
                 error, \
                 error_text)
 
-    query = queryU1 + " ON DUPLICATE KEY UPDATE  \
+        query = queryU1 + " ON DUPLICATE KEY UPDATE  \
 		aruba_part_no = '{0}', \
 		customer_id = '{1}', \
 		customer_name = '{2}', \
@@ -330,11 +330,65 @@ if (len(data_dict) > 0):
                 error, \
                 error_text)
 
-#    print("------------------------")
-#    print(query)
+#        print("------------------------")
+#        print(query)
+        cursor.execute(query)
+        cnx.commit()
 
-    cursor.execute(query)
-    cnx.commit()
+    else:
+        queryU1 = "INSERT INTO central_tools.devices ( \
+  		aruba_part_no, \
+  		customer_id, \
+  		customer_name, \
+  		device_type, \
+  		imei, \
+  		macaddr, \
+  		model, \
+  		serial, \
+  		services, \
+  		tier_type, \
+  		last_refreshed) \
+               VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}',\
+		now())".format( \
+		aruba_part_no, \
+		customer_id, \
+		customer_name, \
+		device_type, \
+		imei, \
+		macaddr, \
+		model, \
+		serial, \
+		services, \
+                tier_type)
+
+        query = queryU1 + " ON DUPLICATE KEY UPDATE  \
+		aruba_part_no = '{0}', \
+		customer_id = '{1}', \
+		customer_name = '{2}', \
+		device_type = '{3}', \
+		imei = '{4}', \
+		macaddr = '{5}', \
+		model = '{6}', \
+		serial = '{7}', \
+		services = '{8}', \
+                tier_type = '{9}', \
+		last_refreshed = now()".format( \
+		aruba_part_no, \
+		customer_id, \
+		customer_name, \
+		device_type, \
+		imei, \
+		macaddr, \
+		model, \
+		serial, \
+		services, \
+                tier_type)
+
+#        print("------------------------")
+#        print(query)
+        cursor.execute(query)
+        cnx.commit()
+
      
 cursor.close()
 cnx.close()
