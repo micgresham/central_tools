@@ -13,3 +13,5 @@ all:
           vars:
             web_port: 8080
             directory: opt
+            site_name: '192.168.56.99'
+            site_ip: '192.168.56.99'

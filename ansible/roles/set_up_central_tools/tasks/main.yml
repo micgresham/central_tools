@@ -1,48 +1,45 @@
 ---
-- name: Install specified python requirements in virtualenv
+- name: Pull in secrets file
+  include_vars:
+    name: secrets
+    file: "{{playbook_dir}}/vars/secrets.yml"
+    
+- name: Pull in list of packages required in venv
+  include_vars:
+    name: venv_packages
+    file: "{{playbook_dir}}/vars/venv_requirements.yml"
+
+- name: Install required packages in venv
   pip:
-    requirements: "/{{vars.vars.directory}}/central_tools/requirements.txt"
-    virtualenv: "/{{vars.vars.directory}}/central_tools/env"
+    virtualenv: "/{{vars.vars.directory}}/central_tools/ct_venv"
+    name: "{{item}}"
+    virtualenv_command: "/usr/bin/python3 -m venv"
+  loop: "{{venv_packages.requirements}}"
 
-- name: Run python scripts for requirements
-  command: "/{{vars.vars.directory}}/central_tools/env/bin/pip3 install -r /{{vars.vars.directory}}/central_tools/requirements.txt"
+- name: Make django file executable
+  file:
+    path: "/{{vars.vars.directory}}/central_tools/manage.py"
+    mode: 0755    
 
-- name: Run python scripts for makemigrations
-  command: "/{{vars.vars.directory}}/central_tools/env/bin/python3 /{{vars.vars.directory}}/central_tools/manage.py makemigrations"
+- name: Django makemigrations
+  django_manage:
+    command: makemigrations
+    virtualenv: "/{{vars.vars.directory}}/central_tools/ct_venv"
+    app_path: /opt/central_tools
 
-- name: Run python scripts to create db auth
-  command: "/{{vars.vars.directory}}/central_tools/env/bin/python3 /{{vars.vars.directory}}/central_tools/manage.py migrate --database=auth_db --fake"
+- name: Django migrate
+  django_manage:
+    command: migrate
+    database: auth_db
+    virtualenv: "/{{vars.vars.directory}}/central_tools/ct_venv"
+    app_path: /opt/central_tools
 
-- name: Run python scripts to create account
-  command: "/{{vars.vars.directory}}/central_tools/env/bin/python3 /{{vars.vars.directory}}/central_tools/manage.py createsuperuser --database=auth_db"  
-
-
-
-# /usr/bin/pip3 install django==3.2.6
-# /usr/bin/pip3 install -r requirements.txt
-# /usr/bin/python3 manage.py makemigrations 
-# /usr/bin/python3 manage.py migrate --database=auth_db
-# /usr/bin/echo " "
-# /usr/bin/echo "Create an account for the Central Tools administrator:"
-# /usr/bin/python3 manage.py createsuperuser --database=auth_db
-
- #needed for gunicorn
-# /usr/bin/sudo /usr/bin/pip install mysqlclient
-# /usr/bin/sudo /usr/bin/pip install Pillow
-# /usr/bin/sudo /usr/bin/pip install jsonfield
-# /usr/bin/sudo /usr/bin/pip install whitenoise
-
-#  /usr/bin/sudo -u central_tools -s
-#  export MY_IP=`/usr/bin/hostname -I | /usr/bin/sed -r 's/( )+//g'` 
-#  /usr/bin/envsubst '$MY_IP' < /opt/central_tools/do-dads/nginx/sites-available/central_tools.orig > /opt/central_tools/do-dads/nginx/sites-available/central_tools
-#  exit
-
-#  /usr/bin/sudo /usr/bin/cp -R /opt/central_tools/do-dads/nginx /etc
-#  /usr/bin/sudo /usr/bin/rm -rf /etc/nginx/sites-available/*.orig
-#  /usr/bin/sudo ln -s /etc/nginx/sites-available/central_tools /etc/nginx/sites-enabled
-
-#  /usr/bin/sudo /usr/bin/cp /opt/central_tools/do-dads/gunicorn.service  /etc/systemd/system/gunicorn.service
-#  /usr/bin/sudo /usr/bin/systemctl enable gunicorn.service
-#  /usr/bin/sudo /usr/bin/systemctl start nginx
-#  /usr/bin/sudo /usr/bin/systemctl start gunicorn.service
+- name: Create an initial superuser.
+  ignore_errors: yes
+  django_manage:
+    command: "createsuperuser --noinput --database=auth_db --noinput --username={{secrets.django_superuser_password}} --email={{secrets.django_superuser_email}}"
+    app_path: /opt/central_tools
+    virtualenv: "/{{vars.vars.directory}}/central_tools/ct_venv"
+  environment:
+    DJANGO_SUPERUSER_PASSWORD: "{{secrets.django_superuser_password}}"
 

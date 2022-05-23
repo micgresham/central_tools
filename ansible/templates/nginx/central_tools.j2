@@ -1,0 +1,25 @@
+server {
+    listen 80;
+    server_name {{vars.vars.site_name}};
+    return 301 https://{{vars.vars.site_name}};
+}
+
+server {
+    listen 443 ssl;
+    server_name {{vars.vars.site_name}};
+
+    ssl_certificate {{cert}};
+    ssl_certificate_key {{key}};
+    ssl_protocols TLSv1.2;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /{{vars.vars.directory}}/central_tools/apps;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_read_timeout 1000;
+        proxy_pass http://unix:/tmp/core.sock;
+    }
+}

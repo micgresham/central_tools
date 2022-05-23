@@ -1,4 +1,9 @@
 ---
+- name: Pull in secrets file
+  include_vars:
+    name: secrets
+    file: "{{playbook_dir}}/vars/secrets.yml"
+
 - name: Delete existing central tools repo only if fixer is set
   file:
     path: "/{{vars.vars.directory}}/central_tools"
@@ -55,21 +60,19 @@
     mode: '0755'
   loop:
     - mysql
-    - mysql/data
 
-- name: Copy Stuff Over
-  copy:
-    src: "/{{vars.vars.directory}}/{{item.src}}"
-    dest: "/{{item.dest}}"
-    remote_src: yes
+- name: Copy over files
+  template:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
   loop:
-    - {src: 'central_tools/do-dads/mysql/mysqld.cnf', dest: '/etc/mysql/mysql.conf.d/mysqld.cnf'}  
-    - {src: 'central_tools/do-dads/mysql/reader.cnf', dest: '/etc/mysql/reader.cnf'}
-    - {src: 'central_tools/do-dads/mysql/scraper.cnf', dest: '/etc/mysql/scraper.cnf'}
-    - {src: 'central_tools/do-dads/mysql/ct_gui_admin.cnf', dest: '/etc/mysql/ct_gui_admin.cnf'}
-    - {src: 'central_tools/do-dads/mysql/ct_gui.cnf', dest: '/etc/mysql/ct_gui.cnf'}
+    - {src: '{{playbook_dir}}/templates/mysql/mysqld.j2', dest: '/etc/mysql/mysql.conf.d/mysqld.cnf'}  
+    - {src: '{{playbook_dir}}/templates/mysql/reader.j2', dest: '/etc/mysql/reader.cnf'}
+    - {src: '{{playbook_dir}}/templates/mysql/scraper.j2', dest: '/etc/mysql/scraper.cnf'}
+    - {src: '{{playbook_dir}}/templates/mysql/ct_gui_admin.j2', dest: '/etc/mysql/ct_gui_admin.cnf'}
+    - {src: '{{playbook_dir}}/templates/mysql/ct_gui.j2', dest: '/etc/mysql/ct_gui.cnf'}
 
-# note - ignore errors is on in case db has already been initialize
+# note - ignore errors is on in case db has already been initialized
 - name: Initialize mysql
   command: /usr/bin/sudo -u mysql /usr/sbin/mysqld --initialize --user=mysql --basedir=/opt/mysql --datadir=/opt/mysql/data
   ignore_errors: yes
@@ -88,9 +91,10 @@
     var: password
 
 - name: Change password
-  command: mysql --user root --password={{password.stdout}} --connect-expired-password --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '.Butt3rcup!';"
+  command: mysql --user root --password={{password.stdout}} --connect-expired-password --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '{{secrets.mysql_root_password}}';"
   ignore_errors: yes
 
+# Delete tables in case they were already created
 - name: Delete tables
   ignore_errors: yes
   mysql_db:
@@ -99,7 +103,7 @@
       - central_tools
       - central_tools_admin
     login_user: root
-    login_password: .Butt3rcup!
+    login_password: "{{secrets.mysql_root_password}}"
 
 - name: Import central_tools
   mysql_db:
@@ -107,31 +111,20 @@
     target: "/{{vars.vars.directory}}/central_tools/central_tools.sql"
     name: all
     login_user: root
-    login_password: .Butt3rcup!
+    login_password: "{{secrets.mysql_root_password}}"
 
-- name: Delete User scraper
+# Delete users if they were already created
+- name: Delete Users
   mysql_user:
     login_user: root
-    login_password: .Butt3rcup!
-    name: scraper
+    login_password: "{{secrets.mysql_root_password}}"
+    name: "{{item}}"
     host_all: yes
-    state: absent 
-
-- name: Delete User reader
-  mysql_user:
-    login_user: root
-    login_password: .Butt3rcup!
-    name: reader
-    host_all: yes
-    state: absent 
-
-- name: Delete User CT_GUI
-  mysql_user:
-    login_user: root
-    login_password: .Butt3rcup!
-    name: CT_GUI
-    host_all: yes
-    state: absent            
+    state: absent
+  loop:
+    - scraper
+    - reader
+    - CT_GUI
 
 - name: Import Users
   ignore_errors: yes
@@ -140,5 +133,5 @@
     target: "/{{vars.vars.directory}}/central_tools/users.sql"
     name: central_tools
     login_user: root
-    login_password: .Butt3rcup!
+    login_password: "{{secrets.mysql_root_password}}"
 

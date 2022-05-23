@@ -84,10 +84,12 @@ required:
     python3.8-minimal:
         version: latest
     python3-virtualenv:
-        version: latest
-    python3.8-venv:
-        version: latest        
+       version: latest
+    #python3.8-venv:
+    #    version: latest        
     python3-pymysql:
+        version: latest
+    letsencrypt:
         version: latest
 purge:
     apparmor:

@@ -1,0 +1,66 @@
+---
+- name: create directory to store certs
+  file:
+    name: /etc/ssl_certs/central_tools
+    state: directory
+
+- name: Create private key
+  openssl_privatekey:
+    path: /etc/ssl_certs/central_tools/cert.key
+
+- name: Create certificate signing request (CSR) for self-signed certificate
+  openssl_csr:
+    privatekey_path: /etc/ssl_certs/central_tools/cert.key
+    common_name: "{{vars.vars.site_name}}"
+    path: /etc/ssl_certs/central_tools/cert.csr
+    organization_name: Mayem
+    subject_alt_name:
+      - "DNS:mayhem.local"
+  register: csr
+
+- name: Create self-signed certificate from CSR
+  openssl_certificate:
+    path: /etc/ssl_certs/central_tools/cert.pem
+    csr_path: /etc/ssl_certs/central_tools/cert.csr
+    privatekey_path: /etc/ssl_certs/central_tools/cert.key
+    provider: selfsigned
+
+- name: set cert facts 
+  set_fact:
+    path: '/etc/ssl_certs/central_tools/cert.pem'
+    privatekey_path: '/etc/ssl_certs/central_tools/cert.key'
+
+- name: Copy nginx config
+  vars:
+    cert: "{{path}}"
+    key: "{{privatekey_path}}"
+  template:
+    src: "{{playbook_dir}}/templates/nginx/central_tools.j2"
+    dest: "/etc/nginx/sites-available/central_tools"
+
+- name: Enable site
+  file: >
+    dest=/etc/nginx/sites-enabled/default
+    src=/etc/nginx/sites-available/central_tools
+    state=link
+
+- name: Copy gnunicorn over
+  template:
+    src: "{{playbook_dir}}/templates/gunicorn_service.j2"
+    dest: "/etc/systemd/system/gunicorn.service"
+
+- name: Enable Services
+  service:
+    name: "{{item}}"
+    enabled: yes
+  loop:
+    - gunicorn
+    - nginx
+
+- name: Restart Services
+  service:
+    name: "{{item}}"
+    state: restarted
+  loop:
+    - gunicorn
+    - nginx   
