@@ -1,4 +1,12 @@
 ---
+- name: Stop Services
+  service:
+    name: "{{item}}"
+    state: stopped
+  loop:
+    - nginx 
+    - gunicorn  
+
 - name: create directory to store certs
   file:
     name: /etc/ssl_certs/central_tools
@@ -44,23 +52,31 @@
     src=/etc/nginx/sites-available/central_tools
     state=link
 
-- name: Copy gnunicorn over
+- name: Copy gunicorn config over
   template:
     src: "{{playbook_dir}}/templates/gunicorn_service.j2"
     dest: "/etc/systemd/system/gunicorn.service"
+
+- name: Reload Services
+  service:
+    name: "{{item}}"
+    state: reloaded
+  loop:
+    - nginx
+    - gunicorn
 
 - name: Enable Services
   service:
     name: "{{item}}"
     enabled: yes
   loop:
-    - gunicorn
     - nginx
+    - gunicorn
 
 - name: Restart Services
   service:
     name: "{{item}}"
     state: restarted
   loop:
-    - gunicorn
-    - nginx   
+    - nginx 
+    - gunicorn  

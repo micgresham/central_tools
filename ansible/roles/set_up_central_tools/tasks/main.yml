@@ -37,7 +37,7 @@
 - name: Create an initial superuser.
   ignore_errors: yes
   django_manage:
-    command: "createsuperuser --noinput --database=auth_db --noinput --username={{secrets.django_superuser_password}} --email={{secrets.django_superuser_email}}"
+    command: "createsuperuser --noinput --database=auth_db --noinput --username={{secrets.django_superuser_name}} --email={{secrets.django_superuser_email}}"
     app_path: /opt/central_tools
     virtualenv: "/{{vars.vars.directory}}/central_tools/ct_venv"
   environment:
