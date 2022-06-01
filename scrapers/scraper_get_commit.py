@@ -161,6 +161,11 @@ userID = args.userID
 
 print("Accessing API as " + userID)
 central_info = test_central(userID)
+if (not central_info):
+   central_info = test_central(userID)
+   if (not central_info):
+     exit(1)
+
 #print("--------------")
 #print(central_info)
 #print("--------------")
@@ -195,6 +200,10 @@ if (len(data_dict) > 0):
           print(" Reauthenticating to Central")
           print("=============================")
           central_info = test_central(userID)
+          if (not central_info):
+             central_info = test_central(userID)
+             if (not central_info):
+               exit(1)
           central = ArubaCentralBase(central_info=central_info, ssl_verify=ssl_verify)
           data2 = get_device_commit_status (central,serial)
       elif data2['status_code'] == 500:

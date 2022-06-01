@@ -4,15 +4,26 @@ import datetime
 import mysql.connector
 import json
 import requests
+import copy
 from pycentral.base import ArubaCentralBase
 from pycentral.configuration import Variables
 from central_test_mysql import test_central
+
+def get_variables (central,serial):
+    v = Variables()
+    new_variable_dict = {}
+
+    response = v.get_template_variables(central,serial)
+    
+    new_variable_dict[serial] = response['msg']['data']['variables']
+#    print(new_variable_dict)
+    return new_variable_dict
 
 def get_all_variables (central,loop_limit=0):
     """ Return a full list of variables for all devices """
     print ("Getting Variables - Will Take Some time")
     # set initial vars
-    limit = 20
+    limit =20 
     v = Variables()
     full_variable_dict = {}
 
@@ -53,6 +64,8 @@ central = ArubaCentralBase(central_info=central_info, ssl_verify=ssl_verify)
     
 # get all device variables - this call takes some time
 data_dict = get_all_variables (central)
+#for testing, uncomment the next like and comment the above line
+#data_dict = get_variables (central,'SG23KMX00R')
 print(data_dict)
 cnx = mysql.connector.connect(option_files='/etc/mysql/scraper.cnf')
 cursor = cnx.cursor()
@@ -64,6 +77,9 @@ for i in data_dict:
     for j in data_dict[i]:
       variable_name = j
       value = data_dict[i][j]
+      if (value == "'"):
+        value = "\"\""
+      
 
       queryU1 = "INSERT INTO central_tools.variables (variable_name,customer_id,value,serial,last_refreshed) VALUES ('{0}','{1}','{2}','{3}',now())".format(variable_name,central_info['customer_id'],value,serial)
       query = queryU1 + " ON DUPLICATE KEY UPDATE  value = '{0}', last_refreshed = now()".format(value)

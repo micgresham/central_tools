@@ -5,6 +5,9 @@ import datetime
 import mysql.connector
 import json
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
 import re
 import time 
 
@@ -46,6 +49,16 @@ def get_inventory (central,type, loop_limit=0):
 
     limit = 1000
     offset = 0
+
+    s = requests.Session()
+
+    retries = Retry(total=5,
+                backoff_factor=1,
+                status_forcelist=[ 502, 503, 504 ])
+
+    s.mount('https://', HTTPAdapter(max_retries=retries))
+    s.mount('http://', HTTPAdapter(max_retries=retries))
+
     access_token = central_info['token']['access_token']
     base_url = central_info['base_url']
     api_function_url = base_url + "platform/device_inventory/v1/devices"
@@ -63,7 +76,7 @@ def get_inventory (central,type, loop_limit=0):
           "sku_type": type
         }
 
-        response = requests.request("GET", api_function_url, headers=qheaders, params=qparams)
+        response = s.request("GET", api_function_url, headers=qheaders, params=qparams)
         if response.json()['devices'] != []:
             device_list = device_list + response.json()['devices']
             offset += limit
@@ -85,77 +98,67 @@ def get_inventory (central,type, loop_limit=0):
 
     return device_list
 
-def get_cfg_details (central, serial, loop_limit=0):
-    # set initial vars
+def get_cfg_details_aps (serial):
     print ("Getting config details for " + serial)
 
-    access_token = central_info['token']['access_token']
-    base_url = central_info['base_url']
-    api_function_url = base_url + "configuration/v1/devices/{0}/config_details".format(serial)
-    qheaders = {
-      "Content-Type":"application/json",
-      "Authorization": "Bearer " + access_token,
-    }
+    cnx2 = mysql.connector.connect(option_files='/etc/mysql/scraper.cnf')
+    cursor2 = cnx2.cursor()
 
-    qparams = {
-      "details": 'false',
-    }
+    query = "SELECT templates.group_name, templates.template_name, templates.template_hash, aps.serial \
+            FROM central_tools.aps\
+            JOIN central_tools.templates ON aps.group_name = templates.group_name \
+            WHERE aps.serial = '{0}'".format(serial); 
 
-#    print(api_function_url)
-    response = requests.request("GET", api_function_url, headers=qheaders, params=qparams)
-#    if "error" in response.json():
-#      return "{'ERROR'}"
-#    else:
+    cursor2.execute(query)
+    row=cursor2.fetchone()
+    data_dict = {}
+    if (cursor2.rowcount < 1):
+     data_dict['serial'] = serial 
+     data_dict['template_name'] = "na"
+     data_dict['template_hash'] = "na"
+     data_dict['group_name'] = "na"
 
-    if (response.status_code == 400):
-       result_str = '{"Device_serial": "na", "Device_type": "na", "Group": "na", "Configuration_error_status": false, "Override_status": false, "Template_name": "na", "Template_hash": "na", "Template_error_status": false,"Error": false, "Error_text": "na"}'
-       error_str = '{ "Error": 1, "Error_text": "' + response.json()['description'] + '" }'
-       response_status = '{ "status_code": ' + str(response.status_code)  + '}' 
-       j_response_status = json.loads(response_status) 
-       j_result = json.loads(result_str)
-       j_error = json.loads(error_str)
-       j_result.update(j_error)
-       j_result.update(j_response_status)
-       print("===============")
-       print(j_result)
-       print("===============")
+    else:
+     data_dict['serial'] = row[3]
+     data_dict['template_name'] = row[1]
+     data_dict['template_hash'] = row[2]
+     data_dict['group_name'] = row[0]
 
-    elif (response.status_code == 500):
-       print(response.text)
-       result_str = '{"Device_serial": "na", "Device_type": "na", "Group": "na", "Configuration_error_status": false, "Override_status": false, "Template_name": "na", "Template_hash": "na", "Template_error_status": false,"Error": false, "Error_text": "na"}'
-       error_str = '{ "Error": 1, "Error_text": "Internal server error"}'
+    cursor2.close()
+    cnx2.close()
+    
+    return data_dict
 
-       response_status = '{ "status_code": ' + str(response.status_code)  + '}' 
-       j_response_status = json.loads(response_status) 
-       j_result = json.loads(result_str)
-       j_error = json.loads(error_str)
-       j_result.update(j_error)
-       j_result.update(j_response_status)
-       print(response.headers)
+def get_cfg_details_switch (serial):
+    print ("Getting config details for " + serial)
 
-    elif (response.status_code == 200):
-      regex1 = r"^--.*\W*Content-Disposition: form-data;\Wname=\"Summary\"\W*Content-Type.*\W*{"
-      regex2 = r"}\W*--.*--\W*"
-      regex3 = r"}\W*\*"
+    cnx2 = mysql.connector.connect(option_files='/etc/mysql/scraper.cnf')
+    cursor2 = cnx2.cursor()
 
-      clean_result = re.sub(regex1, "{", response.text, 0, re.IGNORECASE)
-      clean_result = re.sub(regex2, "}", clean_result, 0, re.IGNORECASE)
-      clean_result = re.sub(regex3, "", clean_result, 0, re.IGNORECASE)
-      
-      j_result = json.loads(clean_result)
-      error_str = '{ "Error": 0, "Error_text": "' '" }'
-      response_status = '{ "status_code": ' + str(response.status_code)  + '}' 
-      j_response_status = json.loads(response_status) 
-      j_error = json.loads(error_str)
-      j_result.update(j_error)
-      j_result.update(j_response_status)
+    query = "SELECT templates.group_name, templates.template_name, templates.template_hash, switches.serial \
+            FROM central_tools.switches \
+            JOIN central_tools.templates ON switches.group_name = templates.group_name \
+            WHERE switches.serial = '{0}'".format(serial); 
 
-    elif (response.status_code == 401): # authentication timed out
-      response_status = '{ "status_code": ' + str(response.status_code)  + '}' 
-      j_result = json.loads(response_status) 
+    cursor2.execute(query)
+    row=cursor2.fetchone()
+    data_dict = {}
+    if (cursor2.rowcount < 1):
+     data_dict['serial'] = serial 
+     data_dict['template_name'] = "na"
+     data_dict['template_hash'] = "na"
+     data_dict['group_name'] = "na"
 
+    else:
+     data_dict['serial'] = row[3]
+     data_dict['template_name'] = row[1]
+     data_dict['template_hash'] = row[2]
+     data_dict['group_name'] = row[0]
 
-    return j_result 
+    cursor2.close()
+    cnx2.close()
+    
+    return data_dict
 
 
 
@@ -163,7 +166,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dev_type', \
                      default = 'ALL', \
                      help='Options are: switch, all_ap, all_controllers, vgw, cap, others. Default is ALL device types.')
-parser.add_argument('--lite',action='store_true') 
 parser.add_argument('--userID', \
                      default = 'scraper', \
                      help='Central Tools user ID to use for API access')
@@ -208,9 +210,6 @@ if dev_type == "ALL":
   data_dict = get_inventory(central,"others") + data_dict
 
 
-print("Sleeping 10 seconds to keep the API happy....")
-time.sleep(10)
-
 cnx = mysql.connector.connect(option_files='/etc/mysql/scraper.cnf')
 cursor = cnx.cursor()
 if (len(data_dict) > 0):
@@ -227,71 +226,54 @@ if (len(data_dict) > 0):
     serial = i['serial']
     services = json.dumps(i['services'])
     tier_type = i['tier_type']
-    if (not args.lite): 
-      data2 = get_cfg_details(central,serial)
-      print(data2['status_code'])
 
-      if data2['status_code'] == 401:
-        print("=============================")
-        print(" Reauthenticating to Central")
-        print("=============================")
-        central_info = test_central(userID)
-        central = ArubaCentralBase(central_info=central_info, ssl_verify=ssl_verify)
-        data2 = get_cfg_details(central,serial)
-  
-#        print(data2)
-#        time.sleep(1)
-        group_name = data2['Group']
-        configuration_error_status = sqlboolean(data2['Configuration_error_status'])  
-        override_status = sqlboolean(data2['Override_status'])
-        template_name = data2['Template_name']
-        template_hash = data2['Template_hash']
-        template_error_status = sqlboolean(data2['Template_error_status'])
-        error = data2['Error']
-        error_text = data2['Error_text']
-  
-        queryU1 = "INSERT INTO central_tools.devices ( \
-  		aruba_part_no, \
-  		customer_id, \
-  		customer_name, \
-  		device_type, \
-  		imei, \
-  		macaddr, \
-  		model, \
-  		serial, \
-  		services, \
-  		tier_type, \
-  		group_name, \
-  		configuration_error_status, \
-  		override_status, \
-  		template_name, \
-  		template_hash, \
-  		template_error_status, \
-                error, \
-                error_text, \
-  		last_refreshed) \
-               VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}',\
-		'{10}','{11}','{12}','{13}','{14}','{15}','{16}','{17}',now())".format( \
-		aruba_part_no, \
-		customer_id, \
-		customer_name, \
-		device_type, \
-		imei, \
-		macaddr, \
-		model, \
-		serial, \
-		services, \
-                tier_type, \
-		group_name, \
-		configuration_error_status, \
-		override_status, \
-		template_name, \
-		template_hash, \
-		template_error_status, \
-                error, \
-                error_text)
+    if device_type == "switch":
+      data2 = get_cfg_details_switch(serial)
+      group_name = data2['group_name']
+      template_name = data2['template_name']
+      template_hash = data2['template_hash']
+    elif device_type == "iap":
+      data2 = get_cfg_details_aps(serial)
+      group_name = data2['group_name']
+      template_name = data2['template_name']
+      template_hash = data2['template_hash']
+    else:
+      group_name = "na"
+      template_name = "na"
+      template_hash = "na"
 
-        query = queryU1 + " ON DUPLICATE KEY UPDATE  \
+    queryU1 = "INSERT INTO central_tools.devices ( \
+  	aruba_part_no, \
+  	customer_id, \
+  	customer_name, \
+  	device_type, \
+  	imei, \
+  	macaddr, \
+  	model, \
+  	serial, \
+  	services, \
+  	tier_type, \
+  	group_name, \
+  	template_name, \
+  	template_hash, \
+  	last_refreshed) \
+        VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}',\
+	'{10}','{11}','{12}',now())".format( \
+  	aruba_part_no, \
+	customer_id, \
+	customer_name, \
+	device_type, \
+	imei, \
+	macaddr, \
+	model, \
+	serial, \
+	services, \
+        tier_type, \
+	group_name, \
+	template_name, \
+	template_hash)
+
+    query = queryU1 + " ON DUPLICATE KEY UPDATE  \
 		aruba_part_no = '{0}', \
 		customer_id = '{1}', \
 		customer_name = '{2}', \
@@ -303,13 +285,8 @@ if (len(data_dict) > 0):
 		services = '{8}', \
                 tier_type = '{9}', \
 		group_name  = '{10}', \
-		configuration_error_status = '{11}', \
-		override_status = '{12}', \
-		template_name = '{13}', \
-		template_hash = '{14}', \
-		template_error_status = '{15}', \
-                error = '{16}', \
-                error_text = '{17}', \
+		template_name = '{11}', \
+		template_hash = '{12}', \
 		last_refreshed = now()".format( \
 		aruba_part_no, \
 		customer_id, \
@@ -322,73 +299,13 @@ if (len(data_dict) > 0):
 		services, \
                 tier_type, \
 		group_name, \
-		configuration_error_status, \
-		override_status, \
 		template_name, \
-		template_hash, \
-		template_error_status, \
-                error, \
-                error_text)
+		template_hash)
 
-#        print("------------------------")
-#        print(query)
-        cursor.execute(query)
-        cnx.commit()
+#    print("------------------------")
+#    print(query)
+    cursor.execute(query)
+    cnx.commit()
 
-    else:
-        queryU1 = "INSERT INTO central_tools.devices ( \
-  		aruba_part_no, \
-  		customer_id, \
-  		customer_name, \
-  		device_type, \
-  		imei, \
-  		macaddr, \
-  		model, \
-  		serial, \
-  		services, \
-  		tier_type, \
-  		last_refreshed) \
-               VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}',\
-		now())".format( \
-		aruba_part_no, \
-		customer_id, \
-		customer_name, \
-		device_type, \
-		imei, \
-		macaddr, \
-		model, \
-		serial, \
-		services, \
-                tier_type)
-
-        query = queryU1 + " ON DUPLICATE KEY UPDATE  \
-		aruba_part_no = '{0}', \
-		customer_id = '{1}', \
-		customer_name = '{2}', \
-		device_type = '{3}', \
-		imei = '{4}', \
-		macaddr = '{5}', \
-		model = '{6}', \
-		serial = '{7}', \
-		services = '{8}', \
-                tier_type = '{9}', \
-		last_refreshed = now()".format( \
-		aruba_part_no, \
-		customer_id, \
-		customer_name, \
-		device_type, \
-		imei, \
-		macaddr, \
-		model, \
-		serial, \
-		services, \
-                tier_type)
-
-#        print("------------------------")
-#        print(query)
-        cursor.execute(query)
-        cnx.commit()
-
-     
 cursor.close()
 cnx.close()

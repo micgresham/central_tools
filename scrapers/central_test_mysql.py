@@ -69,12 +69,12 @@ def test_central(scraperID = "scraper"):
   
     response = requests.request("POST", oath2_url, params=qparams)
  
-    print("DEBUG OUTPUT. Also updated in access_token,json")
     print(response.text.encode('utf8'))
 
     if "error" in response.json():
 
       print("UNABLE to refresh ACCESS TOKEN. REFRESH TOKEN, CLIENT ID or CLIENT SECRET INVALID")
+      return({})
 
     else:
       # extract the new refresh oken from the response

@@ -64,6 +64,7 @@ def get_switches (central, loop_limit=0):
           "offset": offset,
           "show_resources": "True",
           "calculate_client": "True"
+#          "stack_id": "3ad9bc68-8922-4a69-b280-838df84d1e1a"
         }
 
         response = requests.request("GET", api_function_url, headers=qheaders, params=qparams)
@@ -481,7 +482,7 @@ if (len(data_dict) > 0):
                 customer_id)
 
 #    print("------------------------")
-    print(query)
+#    print(query)
 
     cursor.execute(query)
     cnx.commit()
