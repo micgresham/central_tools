@@ -1,0 +1,152 @@
+{% extends "layouts/base.html" %}
+{% block title %}WFsql{% endblock title %}
+{% block content %}
+<style>
+    textarea{
+        width: 70%;
+        height: 50%;
+    }
+</style>
+ <div class="pcoded-content">
+    {% csrf_token %}
+    <div class="card">
+      <div class="card-header">
+        <h5>Workflow Test (WFtest) </h5>
+      </div>
+      <p>Test </p>
+     <div class "card-body">
+      <div class="col-md-6">
+ <div class="card">
+    {% for  value in  menu %}        
+
+    <!--- FIRST LEVEL MENU --->    
+    {% if menu|get_item:value|get_item:"type" == 1 %}
+	      <a href="/{{ menu|get_item:value|get_item:"url" }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"name" }}</span></a>
+
+      {% for  value2 in  menu|get_item:value|get_item:"children" %}        
+
+      <!--- SECOND LEVEL MENU --->    
+      {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"type" == 1 %}
+        <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"url" }}" class="nav-link ">&nbsp;&nbsp;&nbsp;&nbsp;<span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }}</span></a>
+	{% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children" %}
+          {% for  value3 in  menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children" %}        
+
+        <!--- THIRD LEVEL MENU - CANNOT HAVE THIRD LEVEL GROUP --->    
+          {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"type" == 1 %}
+	      <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"url" }}" class="nav-link ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }}</span></a>
+            {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"children" %}
+              <br>Children: {{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"children"  }} <hr>
+            {% endif %}
+          {% endif %}
+          {% endfor %}  
+        {% endif %}
+
+      <!--- SECOND LEVEL GROUP --->    
+      {% else %}
+       <li class="nav-item pcoded-menu-caption">
+         <label>&nbsp;&nbsp;&nbsp;&nbsp;{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }}</label>
+       </li>
+        {% for  value3 in  menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children" %}        
+
+        <!--- THIRD LEVEL MENU - CANNOT HAVE THIRD LEVEL GROUP --->    
+        {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"type" == 1 %}
+          <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"url" }}" class="nav-link ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }}</span></a>
+
+          {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"children" %}
+            <br>Children: {{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"children"  }} <hr>
+          {% else %}
+            <br>Children: None <hr>
+          {% endif %}
+        {% endif %}
+        {% endfor %}  
+
+      {% endif %}
+
+      {% endfor %}  
+
+    <!--- FIRST LEVEL GROUP --->    
+    {% else %}
+       <li class="nav-item pcoded-menu-caption">
+         <label>{{ menu|get_item:value|get_item:"name" }}</label>
+       </li>
+
+      {% for  value2 in  menu|get_item:value|get_item:"children" %}        
+
+      <!--- SECOND LEVEL MENU --->    
+      {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"type" == 1 %}
+       <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"url" }}" class="nav-link ">&nbsp;&nbsp;&nbsp;&nbsp;<span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }}</span></a>
+        <!--- THIRD LEVEL MENU - CANNOT HAVE THIRD LEVEL GROUP --->    
+
+        {% for  value3 in  menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children" %}        
+        {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"type" == 1 %}
+          <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"url" }}" class="nav-link ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }}</span></a>
+
+        {% endif %}
+        {% endfor %}  
+
+      <!--- SECOND LEVEL GROUP --->    
+      {% else %}
+       <li class="nav-item pcoded-menu-caption">
+         <label>&nbsp;&nbsp;&nbsp;&nbsp;{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }}</label>
+       </li>
+          {% for  value3 in  menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children" %}        
+
+
+          <!--- THIRD LEVEL MENU - CANNOT HAVE THIRD LEVEL GROUP --->    
+          {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"type" == 1 %}
+          <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"url" }}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }}</a>
+
+          {% endif %}
+          {% endfor %}  
+
+      {% endif %}
+
+      {% endfor %}  
+    {% endif %}
+  {% endfor %}  
+  {% csrf_token %}
+ </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="row top-gap">
+    <div class="col-xs-12">
+
+    {% if info %}
+        <pre>{{ info }}</pre>
+    {% endif%}
+
+    {% if header %}
+        <p>Rows: {{ rows|length }}</p>
+        <table class="table table-striped table-bordered table-condensed small">
+            <tr>
+                <th>#</th>
+                {% for col in header %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in rows %}
+                <tr>
+                    <td class="active strong">{{ forloop.counter }}</td>
+                    {% for col in row %}
+                        <td>{{ col }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    </div>
+</div>
+</div>
+{% endblock %}

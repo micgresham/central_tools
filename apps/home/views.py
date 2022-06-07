@@ -19,10 +19,12 @@ from django.views import View
 
 
 from .forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
+from apps.home.common_views import make_menu, get_item
 
 @login_required(login_url="/login/")
 def index(request):
     context = {'segment': 'index'}
+    context['menu'] = make_menu(request)
 
     user_form = UpdateUserForm(instance=request.user)
     profile_form = UpdateProfileForm(instance=request.user.profile)
@@ -57,7 +59,10 @@ def pages(request):
         return HttpResponse(html_template.render(context, request))
 
 def home(request):
-    return render(request, 'home/home.html')
+    context = {}
+    context['menu'] = make_menu(request)
+
+    return render( request, "home/home.html", context)
 
 
 class RegisterView(View):
@@ -156,3 +161,4 @@ import apps.home.WFtg
 import apps.home.WF1
 import apps.home.WFcfg
 import apps.home.WFsql
+import apps.home.WFtest

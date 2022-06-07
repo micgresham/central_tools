@@ -42,6 +42,7 @@ from apps.home.common_views import set_variable
 from apps.home.common_views import get_autocommit
 from apps.home.common_views import set_autocommit
 from apps.home.common_views import get_device_config
+from apps.home.common_views import make_menu, get_item
 
 
 #-----------------------------------------
@@ -132,6 +133,7 @@ def WFcfg_select_site(request):
 
   if request.method == 'POST': #a site and dvice type has been selected, now select the variables
     context = {}
+    context['menu'] = make_menu(request)
     stage = request.POST.get('stage')
     if (stage == '1'):
        print("STAGE 1 PROCESSING")
@@ -151,6 +153,7 @@ def WFcfg_select_site(request):
                device_set.append(([each['serial'],each['name']],each['name']+' (SN:'+each['serial']+')'))
 
          context = {'submit_button': "Next"}
+         context['menu'] = make_menu(request)
          context['form']= WFcfg_SelectDeviceForm(site_name=request.POST.get('site_name'),
                                          dev_type=request.POST.get('dev_type'),
                                          device_names=device_set)
@@ -160,6 +163,7 @@ def WFcfg_select_site(request):
          if (queryset['total'] == 0):
             messages.warning(request, 'Selected site and device type has no members.')
             context = {'submit_button': "Next"}
+            context['menu'] = make_menu(request)
             context['form']= WFcfg_SelectSiteForm(customer_id=request.user.profile.central_custID)
             return render( request, "home/WFcfg.html", context)
 
@@ -169,6 +173,7 @@ def WFcfg_select_site(request):
                device_set.append(([each['serial'],each['name']],each['name']+' (SN:'+each['serial']+')'))
 
          context = {'submit_button': "Next"}
+         context['menu'] = make_menu(request)
          context['form']= WFcfg_SelectDeviceForm(site_name=request.POST.get('site_name'),
                                          dev_type=request.POST.get('dev_type'),
                                          device_names=device_set)
@@ -194,6 +199,7 @@ def WFcfg_select_site(request):
          file.write(config_text)
 
        context = {'download_URL' : fn_url, 'config' : config_text}
+       context['menu'] = make_menu(request)
 
        context['form']= WFcfg_ShowConfigeDeviceForm(site_name=site,
                                          dev_type = dev_type,
@@ -211,11 +217,13 @@ def WFcfg_select_site(request):
     else:
        print("NO STAGE PROCESSING")
        context = {'submit_button': "Next"}
+       context['menu'] = make_menu(request)
        context['form']= WFcfg_SelectSiteForm(customer_id=request.user.profile.central_custID)
        return render( request, "home/WFcfg.html", context)
 
   else:
     context = {'submit_button': "Next"}
+    context['menu'] = make_menu(request)
     context['form']= WFcfg_SelectSiteForm(customer_id=request.user.profile.central_custID)
     return render( request, "home/WFcfg.html", context)
 
