@@ -25,6 +25,7 @@ import time
 import math
 
 from .models import CentralSites
+from .pymenu import Menu
 
 
 
@@ -41,7 +42,6 @@ from apps.home.common_views import get_stack_conductor
 from apps.home.common_views import set_variable
 from apps.home.common_views import get_autocommit
 from apps.home.common_views import set_autocommit
-from apps.home.common_views import make_menu, get_item
 
 
 #-----------------------------------------
@@ -286,7 +286,8 @@ def WF1select_site(request):
 
   if request.method == 'POST': #a site and dvice type has been selected, now select the variables
     context = {}
-    context['menu'] = make_menu(request)
+    menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+    context['menu'] = menu
     stage = request.POST.get('stage')
     if (stage == '1'):
        form = WF1SelectTemplateForm(request.POST)
@@ -301,7 +302,8 @@ def WF1select_site(request):
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['menu'] = make_menu(request)
+              menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+              context['menu'] = menu
               context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
@@ -317,7 +319,8 @@ def WF1select_site(request):
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['menu'] = make_menu(request)
+              menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+              context['menu'] = menu
               context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
@@ -327,7 +330,8 @@ def WF1select_site(request):
                  template_set.append((each['group_name'],each['group_name']))
 
          context = {'submit_button': "Next"}
-         context['menu'] = make_menu(request)
+         menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+         context['menu'] = menu
          context['form']= WF1SelectTemplateForm(site_name=request.POST.get('site_name'),
                                            dev_type=request.POST.get('dev_type'),
                                            template_names=template_set)
@@ -338,7 +342,8 @@ def WF1select_site(request):
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['menu'] = make_menu(request)
+              menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+              context['menu'] = menu
               context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
@@ -347,7 +352,8 @@ def WF1select_site(request):
                  device_set.append(([each['serial'],each['name']],each['name']+' (SN:'+each['serial']+')'))
 
            context = {'submit_button': "Next"}
-           context['menu'] = make_menu(request)
+           menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+           context['menu'] = menu
            context['form']= WF1SelectDeviceForm(site_name=request.POST.get('site_name'),
                                            dev_type=request.POST.get('dev_type'),
                                            device_names=device_set)
@@ -357,7 +363,8 @@ def WF1select_site(request):
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['menu'] = make_menu(request)
+              menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+              context['menu'] = menu
               context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
@@ -367,7 +374,8 @@ def WF1select_site(request):
                  device_set.append(([each['serial'],each['name']],each['name']+' (SN:'+each['serial']+')'))
 
            context = {'submit_button': "Next"}
-           context['menu'] = make_menu(request)
+           menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+           context['menu'] = menu
            context['form']= WF1SelectDeviceForm(site_name=request.POST.get('site_name'),
                                            dev_type=request.POST.get('dev_type'),
                                            device_names=device_set)
@@ -376,7 +384,8 @@ def WF1select_site(request):
          if (dev_type == 'IAP'):
             messages.warning(request, 'Bad selection. APs cannot be in a stack')
             context = {'submit_button': "Next"}
-            context['menu'] = make_menu(request)
+            menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+            context['menu'] = menu
             context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
             return render( request, "home/WF1.html", context)
          else: # switch stacks
@@ -384,7 +393,8 @@ def WF1select_site(request):
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['menu'] = make_menu(request)
+              menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+              context['menu'] = menu
               context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
@@ -393,7 +403,8 @@ def WF1select_site(request):
                  stack_set.append(([each['stack_id'],each['name']],each['name']))
 
            context = {'submit_button': "Next"}
-           context['menu'] = make_menu(request)
+           menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+           context['menu'] = menu
            context['form']= WF1SelectStackForm(site_name=request.POST.get('site_name'),
                                            dev_type=request.POST.get('dev_type'),
                                            stack_names=stack_set)
@@ -402,7 +413,8 @@ def WF1select_site(request):
          if (dev_type == 'SWITCH'):
             messages.warning(request, 'Bad selection. SWITCHES cannot be in a VC')
             context = {'submit_button': "Next"}
-            context['menu'] = make_menu(request)
+            menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+            context['menu'] = menu
             context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
             return render( request, "home/WF1.html", context)
          else: # IAP swarm
@@ -410,7 +422,8 @@ def WF1select_site(request):
            if (queryset['total'] == 0):
               messages.warning(request, 'Selected site and device type has no members.')
               context = {'submit_button': "Next"}
-              context['menu'] = make_menu(request)
+              menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+              context['menu'] = menu
               context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
               return render( request, "home/WF1.html", context)
 
@@ -419,7 +432,8 @@ def WF1select_site(request):
                  swarm_set.append(([each['swarm_id'],each['swarm_name']],each['swarm_name']))
 
            context = {}
-           context['menu'] = make_menu(request)
+           menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+           context['menu'] = menu
            context = {'submit_button': "Next"}
            context['form']= WF1SelectVCForm(site_name=request.POST.get('site_name'),
                                            dev_type=request.POST.get('dev_type'),
@@ -458,7 +472,8 @@ def WF1select_site(request):
             
        
          context = {'submit_button': "Submit"}
-         context['menu'] = make_menu(request)
+         menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+         context['menu'] = menu
          context['form']= WF1SelectVariableTemplateForm(site_name=request.POST.get('site_name'),
                                           dev_type=request.POST.get('dev_type'),
                                           template_name = template_name,
@@ -477,7 +492,8 @@ def WF1select_site(request):
          if not queryset:  # no variables defined for the device
             messages.warning(request, 'No variables define for device ' + device_name + '(' + device_serial + ')')
             context = {'submit_button': "Next"}
-            context['menu'] = make_menu(request)
+            menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+            context['menu'] = menu
             context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
             return render( request, "home/WF1.html", context)
            
@@ -487,7 +503,8 @@ def WF1select_site(request):
              variable_set.append((each,each + ' (' + str(queryset['data']['variables'][each]) + ')'))
 
          context = {'submit_button': "Submit"}
-         context['menu'] = make_menu(request)
+         menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+         context['menu'] = menu
          context['form']= WF1SelectVariableDeviceForm(site_name=request.POST.get('site_name'),
                                           dev_type=request.POST.get('dev_type'),
                                           device_name = device_name,
@@ -520,7 +537,8 @@ def WF1select_site(request):
          if not queryset:  # no variables defined
             messages.warning(request, 'No variables define for stack '+ stack_name)
             context = {'submit_button': "Next"}
-            context['menu'] = make_menu(request)
+            menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+            context['menu'] = menu
             context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
             return render( request, "home/WF1.html", context)
          
@@ -553,7 +571,8 @@ def WF1select_site(request):
          if not queryset:  # no variables defined for the device
             messages.warning(request, 'No variables define for swarm '+ swarm_name)
             context = {'submit_button': "Next"}
-            context['menu'] = make_menu(request)
+            menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+            context['menu'] = menu
             context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
             return render( request, "home/WF1.html", context)
             
@@ -742,7 +761,8 @@ def WF1select_site(request):
               messages.warning(request, 'FAILED to set Variable = ' + variable + ' updated in swarm:  ' + swarm_name + ' for device ' + each[1]  + ' (' + each[0] + ')')
 
        context = {'submit_button': "Next"}
-       context['menu'] = make_menu(request)
+       menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+       context['menu'] = menu
        context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
        return render( request, "home/WF1.html", context)
 
@@ -751,13 +771,15 @@ def WF1select_site(request):
     else:
        print("NO STAGE PROCESSING")
        context = {'submit_button': "Next"}
-       context['menu'] = make_menu(request)
+       menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+       context['menu'] = menu
        context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
        return render( request, "home/WF1.html", context)
 
   else:
     context = {'submit_button': "Next"}
-    context['menu'] = make_menu(request)
+    menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+    context['menu'] = menu
     context['form']= WF1SelectSiteForm(customer_id=request.user.profile.central_custID)
     return render( request, "home/WF1.html", context)
 

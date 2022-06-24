@@ -23,6 +23,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.views import View
 from datetime import datetime, timedelta
 from django.core.files.storage import FileSystemStorage
+from .pymenu import Menu
 
 import requests
 import json
@@ -118,6 +119,8 @@ def execute_sql(request):
     context['form'] = form
     context['title'] = "SQL"
 
+    menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+    context['menu'] = menu
     return render(request, 'home/WFsql.html', context)
 
 

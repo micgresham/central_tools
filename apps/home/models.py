@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 """
-Copyright (c) 2019 - present AppSeed.us
+Copyright (c) 2022 - Michael Gresham - mgresham@e-secondstar.com
 """
 
 from django.db import models
@@ -11,31 +11,6 @@ import os.path
 import jsonfield
 
 # Create your models here.
-
-class Menu(models.Model):
-        MENU_TYPES = (
-         (1, 'Menu Item'),
-         (3, 'Menu Group'),
-        )
-
-        id = models.AutoField(primary_key=True)
-        menu_name = models.CharField(max_length = 50)
-        menu_url = models.CharField(max_length = 300,default="/")
-        group = models.ForeignKey(Group, blank=True,null=True,on_delete=models.CASCADE)
-        menu_type = models.IntegerField(choices=MENU_TYPES)
-#        menu_parent = models.ManyToManyField('self',blank=True,null=True)
-        menu_parent = models.ForeignKey('self',blank=True,null=True,on_delete=models.CASCADE)
-
-        class Meta:
-          db_table = 'menus'
-
-        def __str__(self):
-          return self.menu_name
-
-        def save(self, *args, **kwargs):
-          super().save()
-
-        menu_objects =models.Manager()
 
 class Profile(models.Model):
          user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -91,5 +66,4 @@ class CentralSites(models.Model):
         managed = False
         db_table = 'sites'
         unique_together = (('customer_id', 'site_id'),)
-
 

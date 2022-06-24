@@ -46,7 +46,6 @@ import math
 #from apps.home.common_views import set_variable
 #from apps.home.common_views import get_autocommit
 #from apps.home.common_views import set_autocommit
-from apps.home.common_views import make_menu, get_item 
 
 #-----------------------------------------
 #Forms for the workflow
@@ -57,6 +56,7 @@ from django.forms import ModelForm, Textarea
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 from django.template.defaulttags import register # needed for dynamic menus
+from .pymenu import Menu
 
 from django.utils.safestring import mark_safe
 #-----------------------------------------
@@ -68,8 +68,8 @@ def test_menu(request):
     context = {}
 
     context['title'] = "test_menu"
-    context['menu'] = make_menu(request)
-    print(context['menu'])
+    menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+    context['menu'] = menu
 
     return render(request, 'home/WFtest.html', context)
 

@@ -26,6 +26,7 @@ import time
 import math
 
 from .models import CentralSites
+from .pymenu import Menu
 
 
 
@@ -42,7 +43,6 @@ from apps.home.common_views import get_stack_conductor
 from apps.home.common_views import set_variable
 from apps.home.common_views import get_autocommit
 from apps.home.common_views import set_autocommit
-from apps.home.common_views import make_menu, get_item
 
 
 #-----------------------------------------
@@ -353,7 +353,8 @@ def create_tgroup(request):
 
             # return from whence thy came
             context = {}
-            context['menu'] = make_menu(request)
+            menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+            context['menu'] = menu
             context['form'] = CreateTgroupForm()
             return render( request, "home/create_tgroup.html", context)
 
@@ -363,18 +364,21 @@ def create_tgroup(request):
             messages.warning(request, 'URL: ' + api_url)
  
             context = {}
-            context['menu'] = make_menu(request)
+            menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+            context['menu'] = menu
             context['form'] = CreateTgroupForm()
             return render( request, "home/create_tgroup.html", context)
       else:
          context = {}
-         context['menu'] = make_menu(request)
+         menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+         context['menu'] = menu
          context['form'] = CreateTgroupForm()
          return render( request, "home/create_tgroup.html", context)
 
     else:
       context = {}
-      context['menu'] = make_menu(request)
+      menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+      context['menu'] = menu
       context['form'] = CreateTgroupForm()
       return render( request, "home/create_tgroup.html", context)
 
@@ -525,18 +529,21 @@ def create_mtgroup(request):
                messages.warning(request, 'URL: ' + api_url)
  
          context = {}
-         context['menu'] = make_menu(request)
+         menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+         context['menu'] = menu
          context['form'] = CreateMTgroupForm()
          return render( request, "home/create_mtgroup.html", context)
       else:
          context = {}
-         context['menu'] = make_menu(request)
+         menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+         context['menu'] = menu
          context['form'] = CreateMTgroupForm()
          return render( request, "home/create_mtgroup.html", context)
 
     else:
       context = {}
-      context['menu'] = make_menu(request)
+      menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+      context['menu'] = menu
       context['form'] = CreateMTgroupForm()
       return render( request, "home/create_mtgroup.html", context)
 
@@ -579,11 +586,13 @@ def show_sites(request):
       dict_data = CentralSites.objects.filter(customer_id__contains=request.user.profile.central_custID).order_by('site_name')
       
     context = {'query_results': dict_data}
-    context['menu'] = make_menu(request)
+    menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+    context['menu'] = menu
     return render( request, "home/show_sites.html", context)
   else:
     dict_data = CentralSites.objects.filter(customer_id__contains=request.user.profile.central_custID).order_by('site_name')
     context = {'query_results': dict_data}
-    context['menu'] = make_menu(request)
+    menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+    context['menu'] = menu
     return render( request, "home/show_sites.html", context)
 

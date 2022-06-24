@@ -16,15 +16,16 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.views import View
+from .pymenu import Menu, menu2dict
 
 
 from .forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
-from apps.home.common_views import make_menu, get_item
 
 @login_required(login_url="/login/")
 def index(request):
     context = {'segment': 'index'}
-    context['menu'] = make_menu(request)
+    menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+    context['menu'] = menu
 
     user_form = UpdateUserForm(instance=request.user)
     profile_form = UpdateProfileForm(instance=request.user.profile)
@@ -60,8 +61,9 @@ def pages(request):
 
 def home(request):
     context = {}
-    context['menu'] = make_menu(request)
-
+    menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
+    menu2dict(menu)
+    context['menu'] = menu 
     return render( request, "home/home.html", context)
 
 
@@ -162,3 +164,4 @@ import apps.home.WF1
 import apps.home.WFcfg
 import apps.home.WFsql
 import apps.home.WFtest
+import apps.home.pymenu

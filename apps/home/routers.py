@@ -1,4 +1,5 @@
 from .models import Profile
+from .pymenu import Menu
 
 class AuthRouter(object):
     """
@@ -20,6 +21,8 @@ class AuthRouter(object):
             return 'auth_db'
         if model == Profile:
             return 'auth_db'
+        if model == Menu:
+            return 'auth_db'
         return None
 
     def db_for_write(self, model, **hints):
@@ -33,6 +36,8 @@ class AuthRouter(object):
         if model._meta.app_label in self.route_app_labels:
             return 'auth_db'
         if model == Profile:
+            return 'auth_db'
+        if model == Menu:
             return 'auth_db'
 
         return None

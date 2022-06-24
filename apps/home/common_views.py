@@ -25,7 +25,7 @@ from datetime import datetime, timedelta
 import math
 
 from .models import CentralSites
-from .models import Menu
+from .pymenu import Menu
 
 #------------------------------------------------------
 # make_menu - Creates the structure for the dyamic 
@@ -35,82 +35,6 @@ from .models import Menu
 from django.contrib.admin.views.decorators import staff_member_required
 from django.template.defaulttags import register # needed for dynamic menus
 from django.utils.safestring import mark_safe
-
-@register.filter
-def get_item(dictionary, key):
-    return dictionary.get(key)
-
-#@staff_member_required
-def make_menu(request):
-
-    context = {}
-
-    context['title'] = "test_menu"
-    my_group = request.user.groups.values_list('id', flat=True)
-    menu = Menu.menu_objects.values('id','menu_name','group','menu_type','menu_url','menu_parent').order_by('menu_type')
-    menu_layout = {}
-    for item in menu: #level 1
-        item_group = item['group']
-        item_type = item['menu_type']
-        if (item_group is None) or (item_group in my_group):
-            if (item['menu_type'] == 3) and (item['menu_parent'] is None):
-                print(item['menu_name']," (GROUP)")
-                menu_layout[item['menu_name']] = {}
-                menu_layout[item['menu_name']]['name'] = item['menu_name'] 
-                menu_layout[item['menu_name']]['type'] = 3 
-                menu_layout[item['menu_name']]['url'] = "" 
-                menu_layout[item['menu_name']]['children'] = {}
-                for item2 in menu: #level 2
-                    if (item2['menu_type'] == 1) and (item2['menu_parent'] == item['id'] and ((item2['group'] is None) or item2['group'] in my_group)):
-                      print("------",item2['menu_name'])
-                      menu_layout[item['menu_name']]['children'][item2['menu_name']] = {'name': item2['menu_name'],'url': item2['menu_url'],'type': item2['menu_type']}
-                      menu_layout[item['menu_name']]['children'][item2['menu_name']]['children'] = {}
-                      for item3 in menu: #level 3
-                        if (item3['menu_type'] == 1) and (item3['menu_parent'] == item2['id'] and ((item3['group'] is None) or item3['group'] in my_group)):
-                           print("-----------",item3['menu_name'])
-                           menu_layout[item['menu_name']]['children'][item2['menu_name']]['children'][item3['menu_name']] = {'name': item3['menu_name'], 'url': item3['menu_url'],'type': item3['menu_type'] }
-                        elif (item3['menu_type'] == 3) and (item3['menu_parent'] == item2['id'] and ((item3['group'] is None) or item3['group'] in my_group)):
-                           print("-----------",item3['menu_name'],"  (GROUP)")
-                           menu_layout[item['menu_name']]['children'][item2['menu_name']]['children'][item3['menu_name']] = {'name': item3['menu_name'], 'url': item3['menu_url'],'type': item3['menu_type'] }
-
-                    elif (item2['menu_type'] == 3) and (item2['menu_parent'] == item['id'] and ((item2['group'] is None) or item2['group'] in my_group)):
-                      print("------",item2['menu_name']," (GROUP)")
-                      menu_layout[item['menu_name']]['children'][item2['menu_name']] = {'name': item2['menu_name'],'url': item2['menu_url'],'type': item2['menu_type']}
-                      menu_layout[item['menu_name']]['children'][item2['menu_name']]['children'] = {}
-                      for item3 in menu: #level 3
-                        if (item3['menu_type'] == 1) and (item3['menu_parent'] == item2['id'] and ((item3['group'] is None) or item3['group'] in my_group)):
-                           print("-----------",item3['menu_name'])
-                           menu_layout[item['menu_name']]['children'][item2['menu_name']]['children'][item3['menu_name']] = {'name': item3['menu_name'], 'url': item3['menu_url'],'type': item3['menu_type'] }
-
-
-            elif (item_type == 1) and (item['menu_parent'] is None):
-                print(item['menu_name'])
-                menu_layout[item['menu_name']] = {}
-                menu_layout[item['menu_name']] = {'name': item['menu_name'],'url': item['menu_url'],'type': item['menu_type']}
-                menu_layout[item['menu_name']]['children'] = {}
-                for item2 in menu:
-                    if (item2['menu_type'] == 1) and (item2['menu_parent'] == item['id'] and ((item2['group'] is None) or item2['group'] in my_group)):
-                      print("------",item2['menu_name'])
-                      menu_layout[item['menu_name']]['children'][item2['menu_name']] = {'name': item2['menu_name'],'url': item2['menu_url'],'type': item2['menu_type']}
-                      menu_layout[item['menu_name']]['children'][item2['menu_name']]['children'] = {}
-                      for item3 in menu:
-                        if (item3['menu_type'] == 1) and (item3['menu_parent'] == item2['id'] and ((item3['group'] is None) or item3['group'] in my_group)):
-                           print("-----------",item3['menu_name'])
-                           menu_layout[item['menu_name']]['children'][item2['menu_name']]['children'][item3['menu_name']] = {'name': item3['menu_name'], 'url': item3['menu_url'],'type': item3['menu_type'] }
-                    elif (item2['menu_type'] == 3) and (item2['menu_parent'] == item['id'] and ((item2['group'] is None) or item2['group'] in my_group)):
-                      print("------",item2['menu_name']," (GROUP)")
-                      menu_layout[item['menu_name']]['children'][item2['menu_name']] = {'name': item2['menu_name'],'url': item2['menu_url'],'type': item2['menu_type']}
-                      menu_layout[item['menu_name']]['children'][item2['menu_name']]['children'] = {}
-                      for item3 in menu: #level 3
-                        if (item3['menu_type'] == 1) and (item3['menu_parent'] == item2['id'] and ((item3['group'] is None) or item3['group'] in my_group)):
-                           print("-----------",item3['menu_name'])
-                           menu_layout[item['menu_name']]['children'][item2['menu_name']]['children'][item3['menu_name']] = {'name': item3['menu_name'], 'url': item3['menu_url'],'type': item3['menu_type'] }
-
-
-
-#    pprint(menu_layout)
-    return menu_layout
-
 
 @login_required(login_url="/login/")
 def test_central(request, test=True):
