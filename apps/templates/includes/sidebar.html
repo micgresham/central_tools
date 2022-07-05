@@ -1,4 +1,6 @@
 
+{% load pymenu_tag %}
+
     <nav class="pcoded-navbar">
         <div class="navbar-wrapper">
             <div class="navbar-brand header-logo">
@@ -14,100 +16,7 @@
                         class="nav-item {% if 'index' in segment %} active {% endif %}">
                         <a href="/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span class="pcoded-mtext">Home</span></a>
                     </li>
-    {% for  value in  menu %}        
-
-    <!--- FIRST LEVEL MENU --->    
-    {% if menu|get_item:value|get_item:"type" == 1 %}
-      <li data-username={{ menu|get_item:value|get_item:"name" }} class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
-      <a href="/{{ menu|get_item:value|get_item:"url" }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"name" }}</span></a>
-      </li>
-      {% for  value2 in  menu|get_item:value|get_item:"children" %}        
-
-      <!--- SECOND LEVEL MENU --->    
-      {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"type" == 1 %}
-        <li data-username={{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }} class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
-        <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"url" }}" class="nav-link ">&nbsp;&nbsp;&nbsp;&nbsp;<span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }}</span></a>
-	</li>
-	{% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children" %}
-          {% for  value3 in  menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children" %}        
-
-        <!--- THIRD LEVEL MENU - CANNOT HAVE THIRD LEVEL GROUP --->    
-          {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"type" == 1 %}
- 	     <li data-username={{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }} class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
-	     <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"url" }}" class="nav-link ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }}</span></a>
-	     </li>
-          {% endif %}
-          {% endfor %}  
-        {% endif %}
-
-      <!--- SECOND LEVEL GROUP --->    
-      {% else %}
-       <li class="nav-item pcoded-menu-caption">
-         <label>&nbsp;&nbsp;&nbsp;&nbsp;{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }}</label>
-       </li>
-        {% for  value3 in  menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children" %}        
-
-        <!--- THIRD LEVEL MENU - CANNOT HAVE THIRD LEVEL GROUP --->    
-        {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"type" == 1 %}
- 	  <li data-username={{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }} class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
-          <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"url" }}" class="nav-link ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }}</span></a>
-	  </li>
-
-        {% endif %}
-        {% endfor %}  
-
-      {% endif %}
-
-      {% endfor %}  
-
-    <!--- FIRST LEVEL GROUP --->    
-    {% else %}
-    <li data-username="{{ menu|get_item:value|get_item:"name" }}" class="nav-item pcoded-hasmenu">
-    <a href="javascript:" class="nav-link "><span class="pcoded-micon"><i class="feather icon-folder"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"name" }}</span></a>
-
-      <ul class="pcoded-submenu">
-      {% for  value2 in  menu|get_item:value|get_item:"children" %}        
-
-      <!--- SECOND LEVEL MENU --->    
-      {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"type" == 1 %}
-       <li data-username={{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }} class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
-       <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"url" }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }}</span></a>
-       </li>
-        <!--- THIRD LEVEL MENU - CANNOT HAVE THIRD LEVEL GROUP --->    
-
-        {% for  value3 in  menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children" %}        
-        {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"type" == 1 %}
-	  <li data-username={{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }} class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
-          <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"url" }}" class="nav-link ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }}</span></a>
-	 </li>
-
-        {% endif %}
-        {% endfor %}  
-
-      <!--- SECOND LEVEL GROUP --->    
-      {% else %}
-      <li data-username="{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }}" class="nav-item pcoded-hasmenu">
-       <a href="javascript:" class="nav-link "><span class="pcoded-micon"><i class="feather icon-folder"></i></span><span class="pcoded-mtext">{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"name" }}</span></a>
-          {% for  value3 in  menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children" %}        
-
-
-          <ul class="pcoded-submenu">
-          <!--- THIRD LEVEL MENU - CANNOT HAVE THIRD LEVEL GROUP --->    
-          {% if menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"type" == 1 %}
-	  <li data-username={{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }} class="nav-item">
-	  <a href="/{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"url" }}">&nbsp;<i class="feather icon-file-text"></i>&nbsp;&nbsp;{{ menu|get_item:value|get_item:"children"|get_item:value2|get_item:"children"|get_item:value3|get_item:"name" }}</a></span>
-	  </li>
-
-          {% endif %}
-	  </ul>
-          {% endfor %}  
-
-      {% endif %}
-
-      {% endfor %}  
-      </ul>
-    {% endif %}
-  {% endfor %}  
+		    {% menu2html menu %}
   {% csrf_token %}
 
 
