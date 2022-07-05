@@ -16,7 +16,9 @@
                         class="nav-item {% if 'index' in segment %} active {% endif %}">
                         <a href="/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span class="pcoded-mtext">Home</span></a>
                     </li>
+                    {% if user.is_authenticated %} 
 		    {% menu2html menu %}
+                    {% endif %}
   {% csrf_token %}
 
 
@@ -28,6 +30,7 @@
 
 
 
+                    {% if user.is_authenticated %} 
 
                     <li class="nav-item pcoded-menu-caption">
                         <label>Configuration</label>
@@ -47,6 +50,7 @@
                             <span class="pcoded-micon"><i class="feather icon-power"></i></span><span class="pcoded-mtext">Logout</span>
                         </a>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
